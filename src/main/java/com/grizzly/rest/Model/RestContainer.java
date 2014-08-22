@@ -1,5 +1,6 @@
 package com.grizzly.rest.Model;
 
+import android.net.Uri;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
@@ -46,6 +47,7 @@ public class RestContainer {
         if(urlParameters != null && !urlParameters.isEmpty()){
             String customUrl = requestUrl;
             StringBuilder builder = new StringBuilder();
+
             String separator = "?";
 
             builder.append(customUrl);

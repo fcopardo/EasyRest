@@ -62,7 +62,7 @@ public class EasyRestCall<T extends sendRestData, X> extends AsyncTask<Void, Voi
     private HttpMethod methodToCall;
     private HttpHeaders requestHeaders = new HttpHeaders();
     private HttpHeaders responseHeaders;
-    private boolean result = false;
+    protected boolean result = false;
     private HttpMethod fixedMethod;
     private boolean noReturn = false;
 
