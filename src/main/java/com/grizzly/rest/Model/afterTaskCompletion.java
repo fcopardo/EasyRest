@@ -3,7 +3,7 @@ package com.grizzly.rest.Model;
 /**
  * Created by Fco Pardo on 8/23/14.
  */
-public interface afterTaskCompletion {
+public interface afterTaskCompletion<T> {
 
-    <T> void onTaskCompleted(T result, Class<T> myClass);
+    void onTaskCompleted(T result);
 }

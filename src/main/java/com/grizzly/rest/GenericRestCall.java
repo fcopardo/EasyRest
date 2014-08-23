@@ -63,7 +63,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private boolean result = false;
     private HttpMethod fixedMethod;
     private boolean noReturn = false;
-    private afterTaskCompletion taskCompletion;
+    private afterTaskCompletion<X> taskCompletion;
 
     /**
      * Base constructor.
@@ -462,7 +462,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         // mProgressDialog.dismiss();
         this.result = result.booleanValue();
         if(taskCompletion != null){
-            taskCompletion.onTaskCompleted(jsonResponseEntity, jsonResponseEntityClass);
+            taskCompletion.onTaskCompleted(jsonResponseEntity);
         }
     }
 

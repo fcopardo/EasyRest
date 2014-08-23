@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 @RunWith(RobolectricTestRunner.class)
 public class BaseWebCallTest extends BaseAndroidTestClass {
 
+
     @Test
     public void restTest(){
 
@@ -59,6 +60,7 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
 
     }
 
+
     @Test
     public void genericRestTest(){
 
@@ -93,6 +95,7 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
 
     }
 
+
     @Test
     public void UrlParamsTest(){
 
@@ -118,6 +121,45 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
         try {
 
             System.out.println("Rest test: BaseWebCall");
+            org.junit.Assert.assertTrue(restCall.execute().get());
+
+            System.out.println("\nMy test string is:"+restCall.getJsonResponseEntity().getMyValue());
+            System.out.println("\nMy url params are:"+webCall.getRestContainer().getRequestUrl());
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    @Test
+    public void InheritClassTest(){
+
+        WebServiceFactory webFactory = new WebServiceFactory();
+
+        EasyRestCall<BaseWebCall, TestString> restCall = new EasyRestCall<>(BaseWebCall.class, TestString.class, 1);
+
+        BaseWebCall webCall = new BaseWebCall();
+
+        webCall.getRestContainer().setRequestUrl("www.google.cl");
+        webCall.getRestContainer().setMyHttpMethod(DefinitionsHttpMethods.METHOD_POST);
+        webCall.getRestContainer().addParameterToUrl("q", "cheese is bad");
+        webCall.getRestContainer().addParameterToUrl("ie", "UTF-8");
+
+        Header headers = new BasicHeader("Content-type", "application/json");
+
+        Robolectric.addPendingHttpResponse(HttpStatus.OK.value(), "{\n" +
+                "    \"my_value\": \"asdf\"\n" +
+                "}", headers);
+
+        restCall.setEntity(webCall);
+
+        try {
+
+            System.out.println("Rest test: EasyRestCall2");
             org.junit.Assert.assertTrue(restCall.execute().get());
 
             System.out.println("\nMy test string is:"+restCall.getJsonResponseEntity().getMyValue());
