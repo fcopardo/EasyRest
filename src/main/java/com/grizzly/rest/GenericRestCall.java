@@ -18,6 +18,7 @@ package com.grizzly.rest;
 import android.os.AsyncTask;
 import android.os.Build;
 import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
+import com.grizzly.rest.Model.afterTaskCompletion;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -62,6 +63,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private boolean result = false;
     private HttpMethod fixedMethod;
     private boolean noReturn = false;
+    private afterTaskCompletion taskCompletion;
 
     /**
      * Base constructor.
@@ -246,6 +248,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             e.printStackTrace();
         }
         return uri;
+    }
+
+    public void setTaskCompletion(afterTaskCompletion task){
+        this.taskCompletion = task;
     }
 
     /**
@@ -455,7 +461,9 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     protected void onPostExecute(Boolean result) {
         // mProgressDialog.dismiss();
         this.result = result.booleanValue();
+        if(taskCompletion != null){
+            taskCompletion.onTaskCompleted(jsonResponseEntity, jsonResponseEntityClass);
+        }
     }
-
 
 }

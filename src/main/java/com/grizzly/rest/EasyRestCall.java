@@ -20,6 +20,7 @@ import android.os.Build;
 
 import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
 
+import com.grizzly.rest.Model.afterTaskCompletion;
 import com.grizzly.rest.Model.sendRestData;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -65,6 +66,7 @@ public class EasyRestCall<T extends sendRestData, X> extends AsyncTask<Void, Voi
     protected boolean result = false;
     private HttpMethod fixedMethod;
     private boolean noReturn = false;
+    private afterTaskCompletion taskCompletion;
 
     /**
      * Base constructor.
@@ -282,6 +284,10 @@ public class EasyRestCall<T extends sendRestData, X> extends AsyncTask<Void, Voi
         return uri;
     }
 
+    public void setTaskCompletion(afterTaskCompletion task){
+        this.taskCompletion = task;
+    }
+
     /**
      * Process the response of the rest call and assigns the body to the responseEntity.
      * @param response a valid response.
@@ -489,7 +495,9 @@ public class EasyRestCall<T extends sendRestData, X> extends AsyncTask<Void, Voi
     protected void onPostExecute(Boolean result) {
         // mProgressDialog.dismiss();
         this.result = result.booleanValue();
+        if(taskCompletion != null){
+            taskCompletion.onTaskCompleted(jsonResponseEntity, jsonResponseEntityClass);
+        }
     }
-
 
 }
