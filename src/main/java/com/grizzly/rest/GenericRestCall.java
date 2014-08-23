@@ -34,7 +34,7 @@ import java.util.List;
  * Rest class based on the Spring RestTemplate. Allows to send T objects, and retrieves a X result. All classes
  * should be annotated to allow the proper serialization and deserialization. Headers, URL an method must be provided using the setters.
  *
- * @author
+ * @author Fco Pardo
  */
 public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 

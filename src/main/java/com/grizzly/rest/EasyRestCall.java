@@ -37,7 +37,7 @@ import java.util.List;
  * Rest class based on the Spring RestTemplate. Allows to send T objects, and retrieves a X result. All classes
  * must be annotated to allow the proper serialization and deserialization.
  *
- * @author
+ * @author Fco Pardo Fco Pardo
  */
 public class EasyRestCall<T extends sendRestData, X> extends AsyncTask<Void, Void, Boolean> {
 

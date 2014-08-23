@@ -27,7 +27,7 @@ import org.robolectric.RobolectricTestRunner;
 /**
  * Base class for android testing. Provides a generic activity.
  *
- * @author
+ * @author Fco Pardo
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner.class)
