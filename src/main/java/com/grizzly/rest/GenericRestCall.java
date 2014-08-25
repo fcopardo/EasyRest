@@ -342,9 +342,6 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             try {
                 HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
                 ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
-
-
-
                 result = this.processResponseWithData(response);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -496,7 +493,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
         this.result = result.booleanValue();
 
-        if(taskCompletion != null){
+        if(taskCompletion != null && result){
             taskCompletion.onTaskCompleted(jsonResponseEntity);
         }
     }
