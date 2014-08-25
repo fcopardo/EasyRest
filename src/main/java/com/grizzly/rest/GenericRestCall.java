@@ -15,6 +15,8 @@
  */
 package com.grizzly.rest;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Build;
 import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
@@ -64,6 +66,9 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private HttpMethod fixedMethod;
     private boolean noReturn = false;
     private afterTaskCompletion<X> taskCompletion;
+    private Activity activity;
+    private String waitingMessage;
+    private ProgressDialog pd = null;
 
     /**
      * Base constructor.
@@ -254,6 +259,18 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         this.taskCompletion = task;
     }
 
+    public void setActivity(Activity activity) {
+        this.activity = activity;
+    }
+
+    public String getWaitingMessage() {
+        return waitingMessage;
+    }
+
+    public void setWaitingMessage(String waitingMessage) {
+        this.waitingMessage = waitingMessage;
+    }
+
     /**
      * Process the response of the rest call and assigns the body to the responseEntity.
      * @param response a valid response.
@@ -420,7 +437,20 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        // mProgressDialog.show();
+
+        if(activity != null){
+            if(waitingMessage == null || waitingMessage.trim().equalsIgnoreCase("")){
+                waitingMessage = activity.getString(R.string.waiting_message);
+            }
+            pd = new ProgressDialog(activity);
+            pd.setTitle("Processing...");
+            pd.setMessage(waitingMessage);
+            pd.setCancelable(false);
+            pd.setIndeterminate(true);
+            pd.show();
+            System.out.println("MEGAMAN");
+        }
+
     }
 
     /**
@@ -459,8 +489,13 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      */
     @Override
     protected void onPostExecute(Boolean result) {
-        // mProgressDialog.dismiss();
+
+        if(pd != null) {
+            pd.dismiss();
+        }
+
         this.result = result.booleanValue();
+
         if(taskCompletion != null){
             taskCompletion.onTaskCompleted(jsonResponseEntity);
         }

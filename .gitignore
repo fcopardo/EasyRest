@@ -11,6 +11,7 @@
 # Generated files
 bin/
 gen/
+target/
 
 # Gradle files
 .gradle/
@@ -28,6 +29,4 @@ proguard/
 
 # OSX Files
 .DS_Store
-.target/
-target
-target/
+
