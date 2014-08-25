@@ -2,5 +2,6 @@
 <resources>
     <string name="hello">Hello EasyRest!</string>
     <string name="lib_name">EasyRest</string>
-    <string name = "waiting_message">Please wait a bit</string>
+    <string name="waiting_message">Please wait a bit</string>
+    <string name="loading_data">Loading data...</string>
 </resources>

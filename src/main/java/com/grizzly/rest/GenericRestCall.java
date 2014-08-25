@@ -21,6 +21,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
 import com.grizzly.rest.Model.afterTaskCompletion;
+import com.grizzly.rest.Model.afterTaskFailure;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -66,6 +67,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private HttpMethod fixedMethod;
     private boolean noReturn = false;
     private afterTaskCompletion<X> taskCompletion;
+    private afterTaskFailure taskFailure;
     private Activity activity;
     private String waitingMessage;
     private ProgressDialog pd = null;
@@ -259,6 +261,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         this.taskCompletion = task;
     }
 
+    public void setTaskFailure(afterTaskFailure taskFailure) {
+        this.taskFailure = taskFailure;
+    }
+
     public void setActivity(Activity activity) {
         this.activity = activity;
     }
@@ -440,12 +446,11 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 waitingMessage = activity.getString(R.string.waiting_message);
             }
             pd = new ProgressDialog(activity);
-            pd.setTitle("Processing...");
+            pd.setTitle(activity.getString(R.string.loading_data));
             pd.setMessage(waitingMessage);
             pd.setCancelable(false);
             pd.setIndeterminate(true);
             pd.show();
-            System.out.println("MEGAMAN");
         }
 
     }
@@ -493,8 +498,15 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
         this.result = result.booleanValue();
 
-        if(taskCompletion != null && result){
-            taskCompletion.onTaskCompleted(jsonResponseEntity);
+        if(result){
+            if(taskCompletion != null){
+                taskCompletion.onTaskCompleted(jsonResponseEntity);
+            }
+        }
+        else{
+            if(taskFailure != null){
+                taskFailure.onTaskFailed();
+            }
         }
     }
 
