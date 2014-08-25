@@ -71,6 +71,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private Activity activity;
     private String waitingMessage;
     private ProgressDialog pd = null;
+    private Exception failure;
 
     /**
      * Base constructor.
@@ -324,10 +325,12 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, jsonResponseEntityClass);
                 result = this.processResponseWithData(response);
             } catch (Exception e) {
+                failure = e;
                 e.printStackTrace();
                 this.result = false;
             }
         } catch (Exception e) {
+            failure = e;
             e.printStackTrace();
             this.result = false;
         }
@@ -350,14 +353,15 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
                 result = this.processResponseWithData(response);
             } catch (Exception e) {
+                failure = e;
                 e.printStackTrace();
                 this.result = false;
             }
         } catch (Exception e) {
+            failure = e;
             e.printStackTrace();
             this.result = false;
         }
-
     }
 
     /**
@@ -378,6 +382,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
                 result = this.processResponseWithData(response);
             } catch (Exception e) {
+                failure = e;
                 e.printStackTrace();
                 this.result = false;
             }
@@ -417,10 +422,12 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                     this.result = false;
                 }
             } catch (Exception e) {
+                failure = e;
                 e.printStackTrace();
                 this.result = false;
             }
         } catch (Exception e) {
+            failure = e;
             e.printStackTrace();
             this.result = false;
         }
@@ -506,7 +513,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         else{
             if(taskFailure != null){
                 try {
-                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance());
+                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
                 } catch (InstantiationException e) {
                     e.printStackTrace();
                 } catch (IllegalAccessException e) {

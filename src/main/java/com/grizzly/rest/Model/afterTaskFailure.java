@@ -5,5 +5,5 @@ package com.grizzly.rest.Model;
  * Created by Fco Pardo on 8/24/14.
  */
 public interface afterTaskFailure<T> {
-    void onTaskFailed(T result);
+    void onTaskFailed(T result, Exception e);
 }
