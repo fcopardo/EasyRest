@@ -67,7 +67,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private HttpMethod fixedMethod;
     private boolean noReturn = false;
     private afterTaskCompletion<X> taskCompletion;
-    private afterTaskFailure taskFailure;
+    private afterTaskFailure<X> taskFailure;
     private Activity activity;
     private String waitingMessage;
     private ProgressDialog pd = null;
@@ -505,7 +505,13 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         }
         else{
             if(taskFailure != null){
-                taskFailure.onTaskFailed();
+                try {
+                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance());
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
