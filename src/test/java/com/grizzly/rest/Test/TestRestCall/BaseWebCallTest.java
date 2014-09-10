@@ -16,6 +16,10 @@ import org.robolectric.RobolectricTestRunner;
 import org.springframework.http.HttpStatus;
 
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -63,6 +67,8 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
 
     @Test
     public void genericRestTest(){
+
+        Map<String, String> m = new HashMap<>();
 
         WebServiceFactory webFactory = new WebServiceFactory();
 
@@ -170,7 +176,42 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-
     }
 
+    @Test
+    public void BodylessPostTest(){
+
+        EasyRestCall<BaseWebCall, TestString> restCall = new EasyRestCall<>(BaseWebCall.class, TestString.class, 1);
+
+        BaseWebCall webCall = new BaseWebCall();
+
+        webCall.getRestContainer().setRequestUrl("www.google.cl");
+        webCall.getRestContainer().setMyHttpMethod(DefinitionsHttpMethods.METHOD_POST);
+        webCall.getRestContainer().addParameterToUrl("q", "cheese is bad");
+        webCall.getRestContainer().addParameterToUrl("ie", "UTF-8");
+
+        restCall.setBodyless(true);
+
+        Header headers = new BasicHeader("Content-type", "application/json");
+
+        Robolectric.addPendingHttpResponse(HttpStatus.OK.value(), "{\n" +
+                "    \"my_value\": \"asdf\"\n" +
+                "}", headers);
+
+        restCall.setEntity(webCall);
+
+        try {
+
+            System.out.println("Rest test: BodyLess");
+            org.junit.Assert.assertTrue(restCall.execute().get());
+
+            System.out.println("\nMy test string is:"+restCall.getJsonResponseEntity().getMyValue());
+            System.out.println("\nMy url params are:"+webCall.getRestContainer().getRequestUrl());
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -72,6 +72,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private String waitingMessage;
     private ProgressDialog pd = null;
     private Exception failure;
+    private boolean bodyless = false;
 
     /**
      * Base constructor.
@@ -253,15 +254,23 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         try {
             uri = new URI(url);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return uri;
     }
 
+    /**
+     * Interface. Allows to attach a body of code to be executed after a successful rest call.
+     * @param task a class implementing the afterTaskCompletion interface.
+     */
     public void setTaskCompletion(afterTaskCompletion task){
         this.taskCompletion = task;
     }
 
+    /**
+     * Interface. Allows to attach a body of code to be executed after a failed rest call.
+     * @param taskFailure a class implementing the afterTaskFailure interface.
+     */
     public void setTaskFailure(afterTaskFailure taskFailure) {
         this.taskFailure = taskFailure;
     }
@@ -277,6 +286,23 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     public void setWaitingMessage(String waitingMessage) {
         this.waitingMessage = waitingMessage;
     }
+
+    /**
+     * Allows to set the "bodyless" argument. If true, a post request can be sent without a body.
+     * @param bol the value to set.
+     */
+    public void setBodyless(boolean bol){
+        bodyless = bol;
+    }
+
+    /**
+     * Returns the "bodyless" state.
+     * @return
+     */
+    public boolean isBodyless(){
+        return bodyless;
+    }
+
 
     /**
      * Process the response of the rest call and assigns the body to the responseEntity.
@@ -316,7 +342,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
         try {
 
-            HttpEntity<?> requestEntity = new HttpEntity<Object>(entity, requestHeaders);
+            HttpEntity<?> requestEntity;
+            if(!bodyless){
+                requestEntity = new HttpEntity<Object>(entity, requestHeaders);
+            }
+            else{
+                requestEntity = new HttpEntity<Object>(requestHeaders);
+            }
+
             List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
             messageConverters.add(new MappingJackson2HttpMessageConverter());
             restTemplate.setMessageConverters(messageConverters);
@@ -326,12 +359,12 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 result = this.processResponseWithData(response);
             } catch (Exception e) {
                 failure = e;
-                e.printStackTrace();
+                //e.printStackTrace();
                 this.result = false;
             }
         } catch (Exception e) {
             failure = e;
-            e.printStackTrace();
+            //e.printStackTrace();
             this.result = false;
         }
 
@@ -354,12 +387,12 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 result = this.processResponseWithData(response);
             } catch (Exception e) {
                 failure = e;
-                e.printStackTrace();
+                //e.printStackTrace();
                 this.result = false;
             }
         } catch (Exception e) {
             failure = e;
-            e.printStackTrace();
+            //e.printStackTrace();
             this.result = false;
         }
     }
@@ -383,11 +416,11 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 result = this.processResponseWithData(response);
             } catch (Exception e) {
                 failure = e;
-                e.printStackTrace();
+                //e.printStackTrace();
                 this.result = false;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             this.result = false;
         }
 
@@ -423,12 +456,12 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 }
             } catch (Exception e) {
                 failure = e;
-                e.printStackTrace();
+                //e.printStackTrace();
                 this.result = false;
             }
         } catch (Exception e) {
             failure = e;
-            e.printStackTrace();
+            //e.printStackTrace();
             this.result = false;
         }
 
@@ -515,9 +548,9 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 try {
                     taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
                 } catch (InstantiationException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                    ////e.printStackTrace();
                 }
             }
         }
