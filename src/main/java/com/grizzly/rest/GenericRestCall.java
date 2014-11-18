@@ -63,6 +63,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private HttpMethod methodToCall;
     private HttpHeaders requestHeaders = new HttpHeaders();
     private HttpHeaders responseHeaders;
+    private HttpStatus responseStatus;
     private boolean result = false;
     private HttpMethod fixedMethod;
     private boolean noReturn = false;
@@ -223,6 +224,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         this.singleArgument = singleArgument;
     }
 
+    public HttpStatus getResponseStatus() {
+        return responseStatus;
+    }
+
     /**
      * Allows to set the Http method to call. If a invalid or unsupported method is passed, it will be ignored.
      *
@@ -310,7 +315,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      * @return true or false.
      */
     private boolean processResponseWithData(ResponseEntity<X> response){
-        HttpStatus status = response.getStatusCode();
+        HttpStatus status = responseStatus = response.getStatusCode();
         this.setResponseHeaders(response.getHeaders());
         if(DefinitionsHttpMethods.getHttpStates().contains(status.value())) {
             if(!response.getBody().equals(null)) {
@@ -327,7 +332,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      * @return true or false.
      */
     private boolean processResponseWithouthData(ResponseEntity<X> response){
-        HttpStatus status = response.getStatusCode();
+        HttpStatus status = responseStatus = response.getStatusCode();
         this.setResponseHeaders(response.getHeaders());
         if(DefinitionsHttpMethods.getHttpStates().contains(status.value())) {
             return true;
@@ -355,8 +360,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             restTemplate.setMessageConverters(messageConverters);
 
             try {
-                ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, jsonResponseEntityClass);
-                result = this.processResponseWithData(response);
+                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                    ResponseEntity response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, null);
+                    result = this.processResponseWithouthData(response);
+                }
+                else{
+                    ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, jsonResponseEntityClass);
+                    result = this.processResponseWithData(response);
+                }
             } catch (Exception e) {
                 failure = e;
                 //e.printStackTrace();
@@ -383,8 +394,16 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
             try {
                 HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
-                ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
-                result = this.processResponseWithData(response);
+
+                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                    ResponseEntity response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, null);
+                    result = this.processResponseWithouthData(response);
+                }
+                else{
+                    ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
+                    result = this.processResponseWithData(response);
+                }
+
             } catch (Exception e) {
                 failure = e;
                 //e.printStackTrace();
@@ -411,9 +430,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
             try {
 
-                ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, jsonResponseEntityClass);
-
-                result = this.processResponseWithData(response);
+                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                    ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, jsonResponseEntityClass);
+                    result = this.processResponseWithData(response);
+                }
+                else{
+                    ResponseEntity response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, null);
+                    result = this.processResponseWithouthData(response);
+                }
             } catch (Exception e) {
                 failure = e;
                 //e.printStackTrace();
@@ -447,7 +471,6 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             try {
 
                 ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, String.class);
-
                 HttpStatus status = response.getStatusCode();
                 if (status == HttpStatus.OK || status == HttpStatus.ACCEPTED || status == HttpStatus.CREATED) {
                     this.result = true;
