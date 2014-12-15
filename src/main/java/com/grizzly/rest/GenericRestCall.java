@@ -17,8 +17,12 @@ package com.grizzly.rest;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
 import com.grizzly.rest.Model.afterTaskCompletion;
 import com.grizzly.rest.Model.afterTaskFailure;
@@ -28,6 +32,8 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -74,6 +80,8 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private ProgressDialog pd = null;
     private Exception failure;
     private boolean bodyless = false;
+    private Context context = null;
+    private String cachedFileName = "";
 
     /**
      * Base constructor.
@@ -254,6 +262,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         url = Url;
     }
 
+    public String getUrl(){
+        return getURI().toString();
+    }
+
     private URI getURI() {
         URI uri = null;
         try {
@@ -308,6 +320,16 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         return bodyless;
     }
 
+    private Context getContext() {
+        if(context == null){
+            context = context.getApplicationContext();
+        }
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
 
     /**
      * Process the response of the rest call and assigns the body to the responseEntity.
@@ -320,6 +342,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         if(DefinitionsHttpMethods.getHttpStates().contains(status.value())) {
             if(!response.getBody().equals(null)) {
                 jsonResponseEntity = response.getBody();
+
+                if(context != null){
+                    createSolidCache();
+                }
             }
             return true;
         }
@@ -338,6 +364,70 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             return true;
         }
         return false;
+    }
+
+    public void setCachedFileName(String s){
+
+        cachedFileName = getContext().getFilesDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
+                + jsonResponseEntityClass.getSimpleName()+s;
+
+    }
+
+    private String getCachedFileName(){
+
+        if(cachedFileName.isEmpty() || cachedFileName.equalsIgnoreCase("")){
+            return getContext().getFilesDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
+                    + jsonResponseEntityClass.getSimpleName()
+                    +getURI().getAuthority()+getURI().getPath().replace("/", "_")+getURI().getQuery();
+        }
+        return cachedFileName;
+    }
+
+    private void createSolidCache(){
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            File dir = new File(getContext().getFilesDir().getAbsolutePath() + File.separator + "EasyRest");
+            dir.mkdir();
+            File f = new File(getCachedFileName());
+            mapper.writeValue(f, jsonResponseEntity);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean getFromSolidCache()
+    {
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            File dir = new File(getContext().getFilesDir().getAbsolutePath() + File.separator + "EasyRest");
+            dir.mkdir();
+            File f = new File(getCachedFileName());
+            if(f.exists()){
+                jsonResponseEntity = mapper.readValue(f, jsonResponseEntityClass);
+                System.out.println("JSON CACHE ON! " + jsonResponseEntityClass.getSimpleName()+url);
+                return true;
+            }
+        } catch (JsonGenerationException e) {
+
+            e.printStackTrace();
+
+        } catch (JsonMappingException e) {
+
+            e.printStackTrace();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        }
+        catch(NullPointerException e){
+            e.printStackTrace();
+        }
+        return false;
+
     }
 
     /**
@@ -366,7 +456,20 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 }
                 else{
                     ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, jsonResponseEntityClass);
-                    result = this.processResponseWithData(response);
+
+                    if(!cachedFileName.isEmpty() && !cachedFileName.equalsIgnoreCase("")){
+                        File f = new File(getCachedFileName());
+                        if(f.exists()){
+                            getFromSolidCache();
+                            result = true;
+                        }
+                        else{
+                            result = this.processResponseWithData(response);
+                        }
+                    }
+                    else{
+                        result = this.processResponseWithData(response);
+                    }
                 }
             } catch (Exception e) {
                 failure = e;
@@ -401,7 +504,19 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 }
                 else{
                     ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
-                    result = this.processResponseWithData(response);
+                    if(!cachedFileName.isEmpty() && !cachedFileName.equalsIgnoreCase("")){
+                        File f = new File(getCachedFileName());
+                        if(f.exists()){
+                            getFromSolidCache();
+                            result = true;
+                        }
+                        else{
+                            result = this.processResponseWithData(response);
+                        }
+                    }
+                    else{
+                        result = this.processResponseWithData(response);
+                    }
                 }
 
             } catch (Exception e) {
@@ -491,7 +606,6 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
     }
 
-
     /**
      * The following methods belong to the AsyncTask functions, and allows any subclasses to operate directly. To retrieve the boolean value,
      * invoke the Subclass.execute(parameters).get() method.
@@ -561,19 +675,32 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
         this.result = result.booleanValue();
 
+        if(context != null){
+            getFromSolidCache();
+        }
+
         if(result){
             if(taskCompletion != null){
                 taskCompletion.onTaskCompleted(jsonResponseEntity);
             }
         }
         else{
-            if(taskFailure != null){
-                try {
-                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
-                } catch (InstantiationException e) {
-                    //e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    ////e.printStackTrace();
+
+            if(context != null && taskCompletion != null){
+                //TODO: create a more generic naming approach
+                if(getFromSolidCache()){
+                    taskCompletion.onTaskCompleted(jsonResponseEntity);
+                }
+            }
+            else{
+                if(taskFailure != null){
+                    try {
+                        taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                    } catch (InstantiationException e) {
+                        //e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        ////e.printStackTrace();
+                    }
                 }
             }
         }

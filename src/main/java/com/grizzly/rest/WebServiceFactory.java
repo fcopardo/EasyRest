@@ -16,8 +16,12 @@
 
 package com.grizzly.rest;
 
+import android.content.Context;
 import com.grizzly.rest.Model.sendRestData;
 import org.springframework.http.HttpHeaders;
+
+import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * Created on 24/03/14.
@@ -27,7 +31,8 @@ public class WebServiceFactory {
 
     private HttpHeaders requestHeaders = new HttpHeaders();
     private HttpHeaders responseHeaders = new HttpHeaders();
-
+    private Context context = null;
+    private HashMap<String, String> cachedRequests = new HashMap<>();
 
     public HttpHeaders getRequestHeaders() {
         return requestHeaders;
@@ -50,8 +55,21 @@ public class WebServiceFactory {
         this.responseHeaders = responseHeaders;
     }
 
+    private Context getContext() {
+        if(context == null) context = context.getApplicationContext();
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
     public WebServiceFactory() {
         
+    }
+
+    public WebServiceFactory(Context context) {
+        this.context = context;
     }
 
     public <T extends sendRestData, X> EasyRestCall<T, X> getRestCallInstance(Class<T> entityClass, Class<X> responseClass) {
@@ -68,6 +86,26 @@ public class WebServiceFactory {
         }
         else {
             myRestCall = new EasyRestCall<>(entityClass, responseClass);
+        }
+
+        try{
+            if(context != null)
+            {
+                myRestCall.setContext(getContext());
+
+                if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
+
+                    String uuid = UUID.randomUUID().toString();
+                    if(cachedRequests.containsKey(myRestCall.getUrl())){
+                        uuid = cachedRequests.get(myRestCall.getUrl());
+                    }
+                    myRestCall.setCachedFileName(uuid);
+                    cachedRequests.put(myRestCall.getUrl(), uuid);
+                }
+            }
+        }
+        catch(NullPointerException e){
+            e.printStackTrace();
         }
 
         return myRestCall;
@@ -87,6 +125,26 @@ public class WebServiceFactory {
         }
         else {
             myRestCall = new GenericRestCall<>(entityClass, responseClass);
+        }
+
+        try{
+            if(context != null)
+            {
+                myRestCall.setContext(getContext());
+
+                if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
+
+                    String uuid = UUID.randomUUID().toString();
+                    if(cachedRequests.containsKey(myRestCall.getUrl())){
+                        uuid = cachedRequests.get(myRestCall.getUrl());
+                    }
+                    myRestCall.setCachedFileName(uuid);
+                    cachedRequests.put(myRestCall.getUrl(), uuid);
+                }
+            }
+        }
+        catch(NullPointerException e){
+            e.printStackTrace();
         }
 
         return myRestCall;
