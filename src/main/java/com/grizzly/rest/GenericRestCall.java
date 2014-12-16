@@ -407,7 +407,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             File f = new File(getCachedFileName());
             if(f.exists()){
                 jsonResponseEntity = mapper.readValue(f, jsonResponseEntityClass);
-                System.out.println("JSON CACHE ON! " + jsonResponseEntityClass.getSimpleName()+url);
+                System.out.println("JSON CACHE ON! " + jsonResponseEntityClass.getSimpleName()+getCachedFileName());
                 return true;
             }
         } catch (JsonGenerationException e) {

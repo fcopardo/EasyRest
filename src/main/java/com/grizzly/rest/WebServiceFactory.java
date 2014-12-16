@@ -20,6 +20,7 @@ import android.content.Context;
 import com.grizzly.rest.Model.sendRestData;
 import org.springframework.http.HttpHeaders;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -33,6 +34,7 @@ public class WebServiceFactory {
     private HttpHeaders responseHeaders = new HttpHeaders();
     private Context context = null;
     private HashMap<String, String> cachedRequests = new HashMap<>();
+
 
     public HttpHeaders getRequestHeaders() {
         return requestHeaders;
@@ -65,11 +67,17 @@ public class WebServiceFactory {
     }
 
     public WebServiceFactory() {
-        
     }
 
     public WebServiceFactory(Context context) {
         this.context = context;
+    }
+
+    public static void deleteCache(Context context){
+        File f = new File(context.getFilesDir().getAbsolutePath() + File.separator + "EasyRest");
+        for(File file: f.listFiles()){
+            file.delete();
+        }
     }
 
     public <T extends sendRestData, X> EasyRestCall<T, X> getRestCallInstance(Class<T> entityClass, Class<X> responseClass) {
