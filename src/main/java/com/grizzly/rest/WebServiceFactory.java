@@ -73,13 +73,6 @@ public class WebServiceFactory {
         this.context = context;
     }
 
-    public static void deleteCache(Context context){
-        File f = new File(context.getFilesDir().getAbsolutePath() + File.separator + "EasyRest");
-        for(File file: f.listFiles()){
-            file.delete();
-        }
-    }
-
     public <T extends sendRestData, X> EasyRestCall<T, X> getRestCallInstance(Class<T> entityClass, Class<X> responseClass) {
 
         return this.getRestCallInstance(entityClass, responseClass, false);

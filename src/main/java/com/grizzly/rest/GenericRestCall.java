@@ -368,7 +368,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
     public void setCachedFileName(String s){
 
-        cachedFileName = getContext().getFilesDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
+        cachedFileName = getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
                 + jsonResponseEntityClass.getSimpleName()+s;
 
     }
@@ -376,7 +376,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private String getCachedFileName(){
 
         if(cachedFileName.isEmpty() || cachedFileName.equalsIgnoreCase("")){
-            return getContext().getFilesDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
+            return getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
                     + jsonResponseEntityClass.getSimpleName()
                     +getURI().getAuthority()+getURI().getPath().replace("/", "_")+getURI().getQuery();
         }
@@ -388,7 +388,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            File dir = new File(getContext().getFilesDir().getAbsolutePath() + File.separator + "EasyRest");
+            File dir = new File(getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest");
             dir.mkdir();
             File f = new File(getCachedFileName());
             mapper.writeValue(f, jsonResponseEntity);
@@ -402,7 +402,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            File dir = new File(getContext().getFilesDir().getAbsolutePath() + File.separator + "EasyRest");
+            File dir = new File(getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest");
             dir.mkdir();
             File f = new File(getCachedFileName());
             if(f.exists()){
