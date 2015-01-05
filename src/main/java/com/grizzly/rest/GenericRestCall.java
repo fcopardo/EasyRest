@@ -28,6 +28,7 @@ import com.grizzly.rest.Model.afterTaskCompletion;
 import com.grizzly.rest.Model.afterTaskFailure;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.OkHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
@@ -100,8 +101,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
          * all the other versions.
          */
         if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT <=18) {
-            restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+            //restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+            restTemplate.setRequestFactory(new OkHttpRequestFactory());
         }
+        restTemplate.setRequestFactory(new OkHttpRequestFactory());
     }
 
     /**
@@ -451,7 +454,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
             try {
                 if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                    ResponseEntity response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, null);
+                    ResponseEntity response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Void.class);
                     result = this.processResponseWithouthData(response);
                 }
                 else{
@@ -499,7 +502,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
 
                 if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                    ResponseEntity response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, null);
+                    ResponseEntity response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, Void.class);
                     result = this.processResponseWithouthData(response);
                 }
                 else{
@@ -550,7 +553,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                     result = this.processResponseWithData(response);
                 }
                 else{
-                    ResponseEntity response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, null);
+                    ResponseEntity response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, Void.class);
                     result = this.processResponseWithouthData(response);
                 }
             } catch (Exception e) {

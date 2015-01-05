@@ -214,4 +214,35 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void restTestEmpty(){
+
+        WebServiceFactory webFactory = new WebServiceFactory();
+
+        EasyRestCall<BaseWebCall, Void> restCall = webFactory.getRestCallInstance(BaseWebCall.class, Void.class, true);
+
+        BaseWebCall webCall = new BaseWebCall();
+
+        webCall.getRestContainer().setRequestUrl("www.google.cl");
+        webCall.getRestContainer().setMyHttpMethod(DefinitionsHttpMethods.METHOD_POST);
+
+        Header headers = new BasicHeader("Content-type", "application/json");
+
+        Robolectric.addPendingHttpResponse(HttpStatus.OK.value(), "", headers);
+
+        restCall.setEntity(webCall);
+
+        try {
+
+            System.out.println("Rest test: Empty Call");
+            org.junit.Assert.assertTrue(restCall.execute().get());
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+    }
 }
