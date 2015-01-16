@@ -57,7 +57,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
     /**
      * Class members
-     * T: the Ormlite.Entity representing the data to be sent.
+     * T: the Entity representing the data to be sent.
      * X: The Json.Entity to be returned.
      */
     private Class<T> entityClass;
