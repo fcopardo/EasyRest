@@ -698,7 +698,13 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             else{
                 if(taskFailure != null){
                     try {
-                        taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                        if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                            taskFailure.onTaskFailed(null, failure);
+                        }
+                        else{
+                            taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                        }
+
                     } catch (InstantiationException e) {
                         //e.printStackTrace();
                     } catch (IllegalAccessException e) {
