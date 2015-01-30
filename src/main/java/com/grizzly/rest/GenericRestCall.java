@@ -474,7 +474,8 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                         result = this.processResponseWithData(response);
                     }
                 }
-            } catch (Exception e) {
+            } catch (org.springframework.web.client.HttpClientErrorException e) {
+                this.responseStatus = e.getStatusCode();
                 failure = e;
                 //e.printStackTrace();
                 this.result = false;
@@ -522,7 +523,8 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                     }
                 }
 
-            } catch (Exception e) {
+            } catch (org.springframework.web.client.HttpClientErrorException e) {
+                this.responseStatus = e.getStatusCode();
                 failure = e;
                 //e.printStackTrace();
                 this.result = false;
@@ -556,7 +558,8 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                     ResponseEntity response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, Void.class);
                     result = this.processResponseWithouthData(response);
                 }
-            } catch (Exception e) {
+            } catch (org.springframework.web.client.HttpClientErrorException e) {
+                this.responseStatus = e.getStatusCode();
                 failure = e;
                 //e.printStackTrace();
                 this.result = false;
@@ -595,7 +598,8 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 } else {
                     this.result = false;
                 }
-            } catch (Exception e) {
+            } catch (org.springframework.web.client.HttpClientErrorException e) {
+                this.responseStatus = e.getStatusCode();
                 failure = e;
                 //e.printStackTrace();
                 this.result = false;
@@ -698,7 +702,13 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             else{
                 if(taskFailure != null){
                     try {
-                        taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                        if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                            taskFailure.onTaskFailed(null, failure);
+                        }
+                        else{
+                            taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                        }
+
                     } catch (InstantiationException e) {
                         //e.printStackTrace();
                     } catch (IllegalAccessException e) {
