@@ -83,6 +83,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private boolean bodyless = false;
     private Context context = null;
     private String cachedFileName = "";
+    private boolean enableCache = true;
 
     /**
      * Base constructor.
@@ -346,7 +347,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             if(!response.getBody().equals(null)) {
                 jsonResponseEntity = response.getBody();
 
-                if(context != null){
+                if(context != null && enableCache){
                     createSolidCache();
                 }
             }
@@ -410,7 +411,6 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             File f = new File(getCachedFileName());
             if(f.exists()){
                 jsonResponseEntity = mapper.readValue(f, jsonResponseEntityClass);
-                System.out.println("JSON CACHE ON! " + jsonResponseEntityClass.getSimpleName()+getCachedFileName());
                 return true;
             }
         } catch (JsonGenerationException e) {
@@ -431,6 +431,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         }
         return false;
 
+    }
+
+    public void isCacheEnabled(boolean bol){
+        enableCache = bol;
     }
 
     /**
@@ -682,7 +686,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
         this.result = result.booleanValue();
 
-        if(context != null){
+        if(context != null && enableCache){
             getFromSolidCache();
         }
 
@@ -693,7 +697,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         }
         else{
 
-            if(context != null && taskCompletion != null){
+            if(context != null && taskCompletion != null && enableCache){
                 //TODO: create a more generic naming approach
                 if(getFromSolidCache()){
                     taskCompletion.onTaskCompleted(jsonResponseEntity);
