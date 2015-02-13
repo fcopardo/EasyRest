@@ -385,6 +385,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                     + jsonResponseEntityClass.getSimpleName()
                     +getURI().getAuthority()+getURI().getPath().replace("/", "_")+getURI().getQuery();
         }
+        System.out.println("CACHE: "+cachedFileName);
         return cachedFileName;
     }
 

@@ -12,7 +12,6 @@
 bin/
 gen/
 target/
-/target
 
 # Gradle files
 .gradle/
@@ -30,4 +29,6 @@ proguard/
 
 # OSX Files
 .DS_Store
+
+Manifest.java
 
