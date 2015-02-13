@@ -96,12 +96,16 @@ public class WebServiceFactory {
 
                 if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
 
-                    String uuid = UUID.randomUUID().toString();
+                    String uuid;
                     if(cachedRequests.containsKey(myRestCall.getUrl())){
                         uuid = cachedRequests.get(myRestCall.getUrl());
+                        myRestCall.setCachedFileName(uuid);
                     }
-                    myRestCall.setCachedFileName(uuid);
+                    else{
+                        uuid = myRestCall.getCachedFileName();
+                    }
                     cachedRequests.put(myRestCall.getUrl(), uuid);
+                    System.out.println("WEBSERVICEFACTORY:CACHE GENERATED FOR REQUEST="+myRestCall.getUrl()+"is :"+uuid);
                 }
             }
         }
@@ -135,12 +139,16 @@ public class WebServiceFactory {
 
                 if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
 
-                    String uuid = UUID.randomUUID().toString();
+                    String uuid;
                     if(cachedRequests.containsKey(myRestCall.getUrl())){
                         uuid = cachedRequests.get(myRestCall.getUrl());
+                        myRestCall.setCachedFileName(uuid);
                     }
-                    myRestCall.setCachedFileName(uuid);
+                    else{
+                        uuid = myRestCall.getCachedFileName();
+                    }
                     cachedRequests.put(myRestCall.getUrl(), uuid);
+                    System.out.println("WEBSERVICEFACTORY:CACHE GENERATED FOR REQUEST=" + myRestCall.getUrl() + "is :" + uuid);
                 }
             }
         }

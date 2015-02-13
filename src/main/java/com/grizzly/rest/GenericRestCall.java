@@ -377,7 +377,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
     }
 
-    private String getCachedFileName(){
+    public String getCachedFileName(){
 
         if(cachedFileName.isEmpty() || cachedFileName.equalsIgnoreCase("")){
             return getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
