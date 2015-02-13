@@ -21,6 +21,7 @@ import com.grizzly.rest.Model.sendRestData;
 import org.springframework.http.HttpHeaders;
 
 import java.io.File;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -94,18 +95,14 @@ public class WebServiceFactory {
             {
                 myRestCall.setContext(getContext());
 
-                if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
 
-                    String uuid;
-                    if(cachedRequests.containsKey(myRestCall.getUrl())){
+                    String uuid = UUID.randomUUID().toString()+ Calendar.getInstance().getTime().toString()+entityClass.getCanonicalName()+responseClass.getCanonicalName();
+                    if(cachedRequests.containsKey(myRestCall.getUrl()) && !myRestCall.getUrl().toString().isEmpty() && !myRestCall.getUrl().toString().equalsIgnoreCase("")){
                         uuid = cachedRequests.get(myRestCall.getUrl());
-                        myRestCall.setCachedFileName(uuid);
                     }
-                    else{
-                        uuid = myRestCall.getCachedFileName();
-                    }
+                    myRestCall.setCachedFileName(uuid);
                     cachedRequests.put(myRestCall.getUrl(), uuid);
-                    System.out.println("WEBSERVICEFACTORY:CACHE GENERATED FOR REQUEST="+myRestCall.getUrl()+"is :"+uuid);
                 }
             }
         }
@@ -139,16 +136,12 @@ public class WebServiceFactory {
 
                 if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
 
-                    String uuid;
-                    if(cachedRequests.containsKey(myRestCall.getUrl())){
+                    String uuid = UUID.randomUUID().toString()+ Calendar.getInstance().getTime().toString()+entityClass.getCanonicalName()+responseClass.getCanonicalName();
+                    if(cachedRequests.containsKey(myRestCall.getUrl()) && !myRestCall.getUrl().toString().isEmpty() && !myRestCall.getUrl().toString().equalsIgnoreCase("")){
                         uuid = cachedRequests.get(myRestCall.getUrl());
-                        myRestCall.setCachedFileName(uuid);
                     }
-                    else{
-                        uuid = myRestCall.getCachedFileName();
-                    }
+                    myRestCall.setCachedFileName(uuid);
                     cachedRequests.put(myRestCall.getUrl(), uuid);
-                    System.out.println("WEBSERVICEFACTORY:CACHE GENERATED FOR REQUEST=" + myRestCall.getUrl() + "is :" + uuid);
                 }
             }
         }

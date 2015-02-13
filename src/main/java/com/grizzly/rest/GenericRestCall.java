@@ -267,8 +267,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     }
 
     public String getUrl(){
-        return url;
-        //return getURI().toString();
+        return getURI().toString();
     }
 
     private URI getURI() {
