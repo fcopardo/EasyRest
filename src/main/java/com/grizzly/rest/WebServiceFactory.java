@@ -94,7 +94,7 @@ public class WebServiceFactory {
             {
                 myRestCall.setContext(getContext());
 
-                if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
+                if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
 
                     String uuid;
                     if(cachedRequests.containsKey(myRestCall.getUrl())){
