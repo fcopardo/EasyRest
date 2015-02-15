@@ -98,6 +98,8 @@ public class WebServiceFactory {
                 if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
 
                     String uuid = UUID.randomUUID().toString()+ Calendar.getInstance().getTime().toString()+entityClass.getCanonicalName()+responseClass.getCanonicalName();
+
+
                     if(cachedRequests.containsKey(myRestCall.getUrl()) && !myRestCall.getUrl().toString().isEmpty() && !myRestCall.getUrl().toString().equalsIgnoreCase("")){
                         uuid = cachedRequests.get(myRestCall.getUrl());
                     }
