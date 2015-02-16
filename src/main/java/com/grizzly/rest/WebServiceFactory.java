@@ -89,24 +89,24 @@ public class WebServiceFactory {
         else {
             myRestCall = new EasyRestCall<>(entityClass, responseClass);
         }
+        if(context != null)
+        {
+            myRestCall.setContext(getContext());
 
-        try{
-            if(context != null)
-            {
-                myRestCall.setContext(getContext());
+            if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
 
-                if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
-
-                    String uuid = UUID.randomUUID().toString()+ Calendar.getInstance().getTime().toString()+entityClass.getCanonicalName()+responseClass.getCanonicalName();
+                String uuid = UUID.randomUUID().toString()+ Calendar.getInstance().getTime().toString()+entityClass.getCanonicalName()+responseClass.getCanonicalName();
 
 
-                    if(cachedRequests.containsKey(myRestCall.getUrl()) && !myRestCall.getUrl().toString().isEmpty() && !myRestCall.getUrl().toString().equalsIgnoreCase("")){
-                        uuid = cachedRequests.get(myRestCall.getUrl());
-                    }
-                    myRestCall.setCachedFileName(uuid);
-                    cachedRequests.put(myRestCall.getUrl(), uuid);
+                if(cachedRequests.containsKey(myRestCall.getUrl()) && !myRestCall.getUrl().toString().isEmpty() && !myRestCall.getUrl().toString().equalsIgnoreCase("")){
+                    uuid = cachedRequests.get(myRestCall.getUrl());
                 }
+                myRestCall.setCachedFileName(uuid);
+                cachedRequests.put(myRestCall.getUrl(), uuid);
             }
+        }
+        try{
+
         }
         catch(NullPointerException e){
             e.printStackTrace();
@@ -152,6 +152,54 @@ public class WebServiceFactory {
         }
 
         return myRestCall;
+    }
+
+    <T extends sendRestData, X> boolean setCache(EasyRestCall<T, X> myRestCall, Class<X> responseClass, Class<T> entityClass){
+
+        boolean bol = false;
+
+        if(context != null && !myRestCall.getUrl().trim().equalsIgnoreCase("") && myRestCall != null)
+        {
+
+            if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
+
+
+                if(cachedRequests.containsKey(myRestCall.getUrl())){
+                    myRestCall.setCachedFileName(cachedRequests.get(myRestCall.getUrl()));
+                    return true;
+                }
+                else{
+                    cachedRequests.put(myRestCall.getUrl(), myRestCall.getCachedFileName());
+                }
+            }
+            return false;
+        }
+
+        return bol;
+    }
+
+    <T extends sendRestData, X> boolean setCache(GenericRestCall<T, X> myRestCall, Class<X> responseClass, Class<T> entityClass){
+
+        boolean bol = false;
+
+        if(context != null && !myRestCall.getUrl().trim().equalsIgnoreCase("") && myRestCall != null)
+        {
+
+            if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
+
+
+                if(cachedRequests.containsKey(myRestCall.getUrl())){
+                    myRestCall.setCachedFileName(cachedRequests.get(myRestCall.getUrl()));
+                    return true;
+                }
+                else{
+                    cachedRequests.put(myRestCall.getUrl(), myRestCall.getCachedFileName());
+                }
+            }
+            return false;
+        }
+
+        return bol;
     }
 
 }

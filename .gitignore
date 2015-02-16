@@ -13,6 +13,7 @@ bin/
 gen/
 target/
 /target
+target/generated-sources/
 
 # Gradle files
 .gradle/
