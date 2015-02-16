@@ -29,12 +29,12 @@ import java.util.UUID;
  * Created on 24/03/14.
  * Creates instances of parametrized AdvancedRestCall
  */
-public class WebServiceFactory {
+public class WebServiceFactory implements CacheProvider{
 
     private HttpHeaders requestHeaders = new HttpHeaders();
     private HttpHeaders responseHeaders = new HttpHeaders();
     private Context context = null;
-    private HashMap<String, String> cachedRequests = new HashMap<>();
+    private static HashMap<String, String> cachedRequests = new HashMap<>();
 
 
     public HttpHeaders getRequestHeaders() {
@@ -89,22 +89,13 @@ public class WebServiceFactory {
         else {
             myRestCall = new EasyRestCall<>(entityClass, responseClass);
         }
-
+        if(context != null)
+        {
+            myRestCall.setContext(getContext());
+            myRestCall.setCacheProvider(this);
+        }
         try{
-            if(context != null)
-            {
-                myRestCall.setContext(getContext());
 
-                if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
-
-                    String uuid = UUID.randomUUID().toString()+ Calendar.getInstance().getTime().toString()+entityClass.getCanonicalName()+responseClass.getCanonicalName();
-                    if(cachedRequests.containsKey(myRestCall.getUrl()) && !myRestCall.getUrl().toString().isEmpty() && !myRestCall.getUrl().toString().equalsIgnoreCase("")){
-                        uuid = cachedRequests.get(myRestCall.getUrl());
-                    }
-                    myRestCall.setCachedFileName(uuid);
-                    cachedRequests.put(myRestCall.getUrl(), uuid);
-                }
-            }
         }
         catch(NullPointerException e){
             e.printStackTrace();
@@ -133,16 +124,7 @@ public class WebServiceFactory {
             if(context != null)
             {
                 myRestCall.setContext(getContext());
-
-                if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
-
-                    String uuid = UUID.randomUUID().toString()+ Calendar.getInstance().getTime().toString()+entityClass.getCanonicalName()+responseClass.getCanonicalName();
-                    if(cachedRequests.containsKey(myRestCall.getUrl()) && !myRestCall.getUrl().toString().isEmpty() && !myRestCall.getUrl().toString().equalsIgnoreCase("")){
-                        uuid = cachedRequests.get(myRestCall.getUrl());
-                    }
-                    myRestCall.setCachedFileName(uuid);
-                    cachedRequests.put(myRestCall.getUrl(), uuid);
-                }
+                myRestCall.setCacheProvider(this);
             }
         }
         catch(NullPointerException e){
@@ -150,6 +132,31 @@ public class WebServiceFactory {
         }
 
         return myRestCall;
+    }
+
+    @Override
+    public <T, X> boolean setCache(GenericRestCall<T, X> myRestCall, Class<X> responseClass, Class<T> entityClass){
+
+        boolean bol = false;
+
+        if(!myRestCall.getUrl().trim().equalsIgnoreCase("") && myRestCall != null)
+        {
+
+            if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
+
+
+                if(cachedRequests.containsKey(myRestCall.getUrl())){
+                    myRestCall.setCachedFileName(cachedRequests.get(myRestCall.getUrl()));
+                    return true;
+                }
+                else{
+                    cachedRequests.put(myRestCall.getUrl(), myRestCall.getCachedFileName());
+                }
+            }
+            return false;
+        }
+
+        return bol;
     }
 
 }

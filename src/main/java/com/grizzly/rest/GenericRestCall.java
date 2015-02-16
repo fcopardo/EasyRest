@@ -84,6 +84,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private Context context = null;
     private String cachedFileName = "";
     private boolean enableCache = true;
+    private CacheProvider cacheProvider = null;
 
     /**
      * Base constructor.
@@ -275,7 +276,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         try {
             uri = new URI(url);
         } catch (URISyntaxException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         return uri;
     }
@@ -372,8 +373,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
     public void setCachedFileName(String s){
 
-        cachedFileName = getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
-                + jsonResponseEntityClass.getSimpleName()+s;
+        if(s.contains(getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
+                + jsonResponseEntityClass.getSimpleName())){
+            cachedFileName = s;
+        }
+        else{
+            cachedFileName = getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
+                    + jsonResponseEntityClass.getSimpleName()+s;
+        }
 
     }
 
@@ -406,12 +413,17 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     {
         ObjectMapper mapper = new ObjectMapper();
 
+        if(cacheProvider!=null){
+            cacheProvider.setCache(this, jsonResponseEntityClass, entityClass);
+        }
+
         try {
             File dir = new File(getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest");
             dir.mkdir();
             File f = new File(getCachedFileName());
             if(f.exists()){
                 jsonResponseEntity = mapper.readValue(f, jsonResponseEntityClass);
+                this.responseStatus = HttpStatus.OK;
                 return true;
             }
         } catch (JsonGenerationException e) {
@@ -436,6 +448,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
     public void isCacheEnabled(boolean bol){
         enableCache = bol;
+    }
+
+    void setCacheProvider(CacheProvider provider){
+        cacheProvider = provider;
     }
 
     /**
@@ -463,31 +479,34 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                     result = this.processResponseWithouthData(response);
                 }
                 else{
-                    ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, jsonResponseEntityClass);
 
-                    if(!cachedFileName.isEmpty() && !cachedFileName.equalsIgnoreCase("")){
+                    ResponseEntity<X> response = null;
+
+                    if(context!=null){
                         File f = new File(getCachedFileName());
                         if(f.exists()){
                             getFromSolidCache();
                             result = true;
                         }
                         else{
+                            response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, jsonResponseEntityClass);
                             result = this.processResponseWithData(response);
                         }
                     }
                     else{
+                        response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, jsonResponseEntityClass);
                         result = this.processResponseWithData(response);
                     }
                 }
             } catch (org.springframework.web.client.HttpClientErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 failure = e;
-                //e.printStackTrace();
+                e.printStackTrace();
                 this.result = false;
             }
         } catch (Exception e) {
             failure = e;
-            //e.printStackTrace();
+            e.printStackTrace();
             this.result = false;
         }
 
@@ -512,18 +531,21 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                     result = this.processResponseWithouthData(response);
                 }
                 else{
-                    ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
-                    if(!cachedFileName.isEmpty() && !cachedFileName.equalsIgnoreCase("")){
+                    ResponseEntity<X> response = null;
+
+                    if(context!=null){
                         File f = new File(getCachedFileName());
                         if(f.exists()){
                             getFromSolidCache();
                             result = true;
                         }
                         else{
+                            response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
                             result = this.processResponseWithData(response);
                         }
                     }
                     else{
+                        response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
                         result = this.processResponseWithData(response);
                     }
                 }
@@ -531,12 +553,12 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             } catch (org.springframework.web.client.HttpClientErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 failure = e;
-                //e.printStackTrace();
+                e.printStackTrace();
                 this.result = false;
             }
         } catch (Exception e) {
             failure = e;
-            //e.printStackTrace();
+            e.printStackTrace();
             this.result = false;
         }
     }
@@ -566,11 +588,11 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             } catch (org.springframework.web.client.HttpClientErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 failure = e;
-                //e.printStackTrace();
+                e.printStackTrace();
                 this.result = false;
             }
         } catch (Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
             this.result = false;
         }
 
@@ -606,12 +628,12 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             } catch (org.springframework.web.client.HttpClientErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 failure = e;
-                //e.printStackTrace();
+                e.printStackTrace();
                 this.result = false;
             }
         } catch (Exception e) {
             failure = e;
-            //e.printStackTrace();
+            e.printStackTrace();
             this.result = false;
         }
 
@@ -715,9 +737,9 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                         }
 
                     } catch (InstantiationException e) {
-                        //e.printStackTrace();
+                        e.printStackTrace();
                     } catch (IllegalAccessException e) {
-                        ////e.printStackTrace();
+                        //e.printStackTrace();
                     }
                 }
             }
