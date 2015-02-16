@@ -540,12 +540,12 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                             result = true;
                         }
                         else{
-                            response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, jsonResponseEntityClass);
+                            response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
                             result = this.processResponseWithData(response);
                         }
                     }
                     else{
-                        response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, jsonResponseEntityClass);
+                        response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
                         result = this.processResponseWithData(response);
                     }
                 }
