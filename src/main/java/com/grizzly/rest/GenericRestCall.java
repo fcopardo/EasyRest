@@ -38,7 +38,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Rest class based on the Spring RestTemplate. Allows to send T objects, and retrieves a X result. All classes
@@ -85,6 +87,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private String cachedFileName = "";
     private boolean enableCache = true;
     private CacheProvider cacheProvider = null;
+    private long cacheTime = 899999;
 
     /**
      * Base constructor.
@@ -453,6 +456,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     void setCacheProvider(CacheProvider provider){
         cacheProvider = provider;
     }
+    
+    public void setCacheTime(Long time){
+        cacheTime = time;
+    }
 
     /**
      * Post call. Sends T in J form to retrieve a X result.
@@ -482,9 +489,9 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
                     ResponseEntity<X> response = null;
 
-                    if(context!=null){
+                    if(context !=null){
                         File f = new File(getCachedFileName());
-                        if(f.exists()){
+                        if(f.exists() && (Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime || !EasyRest.checkConnectivity())) {
                             getFromSolidCache();
                             result = true;
                         }
@@ -533,9 +540,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 else{
                     ResponseEntity<X> response = null;
 
-                    if(context!=null){
+                    if(context !=null){
                         File f = new File(getCachedFileName());
-                        if(f.exists()){
+
+                        if(f.exists() && (Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime || !EasyRest.checkConnectivity())) {
                             getFromSolidCache();
                             result = true;
                         }

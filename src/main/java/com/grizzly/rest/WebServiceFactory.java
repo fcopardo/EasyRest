@@ -34,6 +34,7 @@ public class WebServiceFactory implements CacheProvider{
     private HttpHeaders requestHeaders = new HttpHeaders();
     private HttpHeaders responseHeaders = new HttpHeaders();
     private Context context = null;
+    private long globalCacheTime = 899999;
     private static HashMap<String, String> cachedRequests = new HashMap<>();
 
 
@@ -67,6 +68,10 @@ public class WebServiceFactory implements CacheProvider{
         this.context = context;
     }
 
+    public void setGlobalCacheTime(long time){
+        globalCacheTime = time;
+    }
+
     public WebServiceFactory() {
     }
 
@@ -93,6 +98,7 @@ public class WebServiceFactory implements CacheProvider{
         {
             myRestCall.setContext(getContext());
             myRestCall.setCacheProvider(this);
+            myRestCall.setCacheTime(globalCacheTime);
         }
         try{
 
@@ -125,6 +131,7 @@ public class WebServiceFactory implements CacheProvider{
             {
                 myRestCall.setContext(getContext());
                 myRestCall.setCacheProvider(this);
+                myRestCall.setCacheTime(globalCacheTime);
             }
         }
         catch(NullPointerException e){
