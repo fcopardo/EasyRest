@@ -374,7 +374,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         return false;
     }
 
-    public void setCachedFileName(String s){
+    void setCachedFileName(String s){
 
         if(s.contains(getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
                 + jsonResponseEntityClass.getSimpleName())){
@@ -387,7 +387,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
     }
 
-    public String getCachedFileName(){
+    String getCachedFileName(){
 
         if(cachedFileName.isEmpty() || cachedFileName.equalsIgnoreCase("")){
             return getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
@@ -464,7 +464,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     /**
      * Post call. Sends T in J form to retrieve a X result.
      */
-    public void doPost() {
+    private void doPost() {
 
         try {
 
@@ -522,7 +522,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     /**
      * Get call. It doesn't send anything, but retrieves X.
      */
-    public void doGet() {
+    private void doGet() {
 
         try {
 
@@ -574,7 +574,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     /**
      * Delete call. Sends T to retrieve a C result.
      */
-    public void doDelete() {
+    private void doDelete() {
 
         try {
 
@@ -611,7 +611,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      *
      * @param singleArgument
      */
-    public void doDelete(String singleArgument) {
+    private void doDelete(String singleArgument) {
 
         try {
 
@@ -752,6 +752,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 }
             }
         }
+        context = null;
     }
 
 }
