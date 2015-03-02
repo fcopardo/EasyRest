@@ -24,6 +24,7 @@ public class RestContainer {
     private HttpHeaders myRequestHeaders = null;
     private String requestUrl = "";
     private Map<String, Object> urlParameters = null;
+    private boolean cacheEnabled = true;
 
     public void setMyHttpMethod(HttpMethod Method) {
 

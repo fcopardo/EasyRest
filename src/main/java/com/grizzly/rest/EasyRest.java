@@ -37,4 +37,13 @@ public class EasyRest {
         return isConnected;
     }
 
+    public static boolean checkConnectivity(Context context){
+        context = context.getApplicationContext();
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        context = null;
+        return isConnected;
+    }
+
 }
