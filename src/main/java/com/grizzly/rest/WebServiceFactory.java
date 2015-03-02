@@ -55,9 +55,9 @@ public class WebServiceFactory implements CacheProvider{
         responseHeaders = new HttpHeaders();
     }
 
-    public void setResponseHeaders(HttpHeaders responseHeaders) {
+    /*public void setResponseHeaders(HttpHeaders responseHeaders) {
         this.responseHeaders = responseHeaders;
-    }
+    }*/
 
     private Context getContext() {
         if(context == null) context = context.getApplicationContext();
@@ -100,6 +100,9 @@ public class WebServiceFactory implements CacheProvider{
             myRestCall.setCacheProvider(this);
             myRestCall.setCacheTime(globalCacheTime);
         }
+        if(requestHeaders!= null && !requestHeaders.isEmpty()){
+           myRestCall.setRequestHeaders(requestHeaders);
+        }
         try{
 
         }
@@ -136,6 +139,9 @@ public class WebServiceFactory implements CacheProvider{
         }
         catch(NullPointerException e){
             e.printStackTrace();
+        }
+        if(requestHeaders!= null && !requestHeaders.isEmpty()){
+            myRestCall.setRequestHeaders(requestHeaders);
         }
 
         return myRestCall;
