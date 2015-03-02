@@ -509,6 +509,9 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 this.responseStatus = e.getStatusCode();
                 failure = e;
                 e.printStackTrace();
+                if(e.getStatusCode() == null){
+                    System.out.println("OMG-STATUS ERROR NULL");
+                }
                 this.result = false;
             }
         } catch (Exception e) {
