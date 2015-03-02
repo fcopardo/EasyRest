@@ -46,9 +46,9 @@ public class WebServiceFactory implements CacheProvider{
         this.requestHeaders = requestHeaders;
     }
 
-    public HttpHeaders getResponseHeaders() {
+    /*public HttpHeaders getResponseHeaders() {
         return responseHeaders;
-    }
+    }*/
 
     public void resetHeaders() {
         requestHeaders = new HttpHeaders();
