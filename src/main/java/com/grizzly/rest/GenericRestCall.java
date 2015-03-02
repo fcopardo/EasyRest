@@ -491,7 +491,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
                     if(context !=null){
                         File f = new File(getCachedFileName());
-                        if(f.exists() && (Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime || !EasyRest.checkConnectivity(getContext()))) {
+                        if(f.exists() && ((enableCache && Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime) || !EasyRest.checkConnectivity(getContext()))) {
                             getFromSolidCache();
                             result = true;
                         }
@@ -543,7 +543,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                     if(context !=null){
                         File f = new File(getCachedFileName());
 
-                        if(f.exists() && (Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime || !EasyRest.checkConnectivity(getContext()))) {
+                        if(f.exists() && ((enableCache && Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime) || !EasyRest.checkConnectivity(getContext()))) {
                             getFromSolidCache();
                             result = true;
                         }
