@@ -71,6 +71,7 @@ public class DefinitionsHttpMethods {
         list.add(HttpStatus.OK.value());
         list.add(HttpStatus.ACCEPTED.value());
         list.add(HttpStatus.CREATED.value());
+        list.add(HttpStatus.INTERNAL_SERVER_ERROR.value());
         return list;
     }
 }
