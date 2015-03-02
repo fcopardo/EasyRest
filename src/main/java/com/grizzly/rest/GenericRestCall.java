@@ -345,9 +345,9 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      * @return true or false.
      */
     private boolean processResponseWithData(ResponseEntity<X> response){
-        HttpStatus status = responseStatus = response.getStatusCode();
+        responseStatus = response.getStatusCode();
         this.setResponseHeaders(response.getHeaders());
-        if(DefinitionsHttpMethods.getHttpStates().contains(status.value())) {
+        if(DefinitionsHttpMethods.getHttpStates().contains(responseStatus.value())) {
             if(!response.getBody().equals(null)) {
                 jsonResponseEntity = response.getBody();
 
