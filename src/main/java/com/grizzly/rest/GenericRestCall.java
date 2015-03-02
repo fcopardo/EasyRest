@@ -38,7 +38,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Rest class based on the Spring RestTemplate. Allows to send T objects, and retrieves a X result. All classes
@@ -85,6 +87,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private String cachedFileName = "";
     private boolean enableCache = true;
     private CacheProvider cacheProvider = null;
+    private long cacheTime = 899999;
 
     /**
      * Base constructor.
@@ -371,7 +374,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         return false;
     }
 
-    public void setCachedFileName(String s){
+    void setCachedFileName(String s){
 
         if(s.contains(getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
                 + jsonResponseEntityClass.getSimpleName())){
@@ -384,7 +387,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
     }
 
-    public String getCachedFileName(){
+    String getCachedFileName(){
 
         if(cachedFileName.isEmpty() || cachedFileName.equalsIgnoreCase("")){
             return getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
@@ -453,11 +456,15 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     void setCacheProvider(CacheProvider provider){
         cacheProvider = provider;
     }
+    
+    public void setCacheTime(Long time){
+        cacheTime = time;
+    }
 
     /**
      * Post call. Sends T in J form to retrieve a X result.
      */
-    public void doPost() {
+    private void doPost() {
 
         try {
 
@@ -482,9 +489,9 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
                     ResponseEntity<X> response = null;
 
-                    if(context!=null){
+                    if(context !=null){
                         File f = new File(getCachedFileName());
-                        if(f.exists()){
+                        if(f.exists() && (Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime || !EasyRest.checkConnectivity(getContext()))) {
                             getFromSolidCache();
                             result = true;
                         }
@@ -515,7 +522,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     /**
      * Get call. It doesn't send anything, but retrieves X.
      */
-    public void doGet() {
+    private void doGet() {
 
         try {
 
@@ -533,9 +540,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 else{
                     ResponseEntity<X> response = null;
 
-                    if(context!=null){
+                    if(context !=null){
                         File f = new File(getCachedFileName());
-                        if(f.exists()){
+
+                        if(f.exists() && (Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime || !EasyRest.checkConnectivity(getContext()))) {
                             getFromSolidCache();
                             result = true;
                         }
@@ -566,7 +574,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     /**
      * Delete call. Sends T to retrieve a C result.
      */
-    public void doDelete() {
+    private void doDelete() {
 
         try {
 
@@ -603,7 +611,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      *
      * @param singleArgument
      */
-    public void doDelete(String singleArgument) {
+    private void doDelete(String singleArgument) {
 
         try {
 
@@ -744,6 +752,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 }
             }
         }
+        context = null;
     }
 
 }
