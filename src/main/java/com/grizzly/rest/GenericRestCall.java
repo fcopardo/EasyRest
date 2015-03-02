@@ -31,6 +31,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.OkHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
@@ -505,13 +506,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                         result = this.processResponseWithData(response);
                     }
                 }
-            } catch (org.springframework.web.client.HttpClientErrorException e) {
+            } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 failure = e;
                 e.printStackTrace();
-                if(e.getStatusCode() == null){
-                    System.out.println("OMG-STATUS ERROR NULL");
-                }
                 this.result = false;
             }
         } catch (Exception e) {
