@@ -111,6 +111,8 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             restTemplate.setRequestFactory(new OkHttpRequestFactory());
         }
         restTemplate.setRequestFactory(new OkHttpRequestFactory());
+
+
     }
 
     /**
@@ -348,17 +350,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private boolean processResponseWithData(ResponseEntity<X> response){
         responseStatus = response.getStatusCode();
         this.setResponseHeaders(response.getHeaders());
-        if(DefinitionsHttpMethods.getHttpStates().contains(responseStatus.value())) {
-            if(!response.getBody().equals(null)) {
-                jsonResponseEntity = response.getBody();
+        if(!response.getBody().equals(null)) {
+            jsonResponseEntity = response.getBody();
 
-                if(context != null && enableCache){
-                    createSolidCache();
-                }
+            if(context != null && enableCache){
+                createSolidCache();
             }
-            return true;
         }
-        return false;
+        return true;
     }
 
     /**
@@ -367,12 +366,9 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      * @return true or false.
      */
     private boolean processResponseWithouthData(ResponseEntity<X> response){
-        HttpStatus status = responseStatus = response.getStatusCode();
+        responseStatus = response.getStatusCode();
         this.setResponseHeaders(response.getHeaders());
-        if(DefinitionsHttpMethods.getHttpStates().contains(status.value())) {
-            return true;
-        }
-        return false;
+        return true;
     }
 
     void setCachedFileName(String s){
@@ -559,7 +555,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                     }
                 }
 
-            } catch (org.springframework.web.client.HttpClientErrorException e) {
+            } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 failure = e;
                 e.printStackTrace();
@@ -587,14 +583,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             try {
 
                 if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                    ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, jsonResponseEntityClass);
-                    result = this.processResponseWithData(response);
-                }
-                else{
                     ResponseEntity response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, Void.class);
                     result = this.processResponseWithouthData(response);
                 }
-            } catch (org.springframework.web.client.HttpClientErrorException e) {
+                else{
+                    ResponseEntity<X> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, jsonResponseEntityClass);
+                    result = this.processResponseWithData(response);
+                }
+            } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 failure = e;
                 e.printStackTrace();
@@ -634,7 +630,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 } else {
                     this.result = false;
                 }
-            } catch (org.springframework.web.client.HttpClientErrorException e) {
+            } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 failure = e;
                 e.printStackTrace();
@@ -693,11 +689,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         }
 
         if (this.getMethodToCall()==DefinitionsHttpMethods.METHOD_DELETE) {
-            if (singleArgument.isEmpty()) {
-                this.doDelete();
-            } else {
-                this.doDelete(singleArgument);
-            }
+            this.doDelete();
         }
         return this.result;
     }
