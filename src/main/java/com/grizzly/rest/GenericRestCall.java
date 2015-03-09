@@ -642,6 +642,63 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             this.result = false;
         }
 
+    }
+
+    /**
+     * Put call. Sends T in J form to retrieve a X result.
+     */
+    private void doPut() {
+
+        try {
+
+            HttpEntity<?> requestEntity;
+            if(!bodyless){
+                requestEntity = new HttpEntity<Object>(entity, requestHeaders);
+            }
+            else{
+                requestEntity = new HttpEntity<Object>(requestHeaders);
+            }
+
+            List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+            messageConverters.add(new MappingJackson2HttpMessageConverter());
+            restTemplate.setMessageConverters(messageConverters);
+
+            try {
+                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                    ResponseEntity response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+                    result = this.processResponseWithouthData(response);
+                }
+                else{
+
+                    ResponseEntity<X> response = null;
+
+                    if(context !=null){
+                        File f = new File(getCachedFileName());
+                        if(f.exists() && ((enableCache && Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime) || !EasyRest.checkConnectivity(getContext()))) {
+                            getFromSolidCache();
+                            result = true;
+                        }
+                        else{
+                            response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, jsonResponseEntityClass);
+                            result = this.processResponseWithData(response);
+                        }
+                    }
+                    else{
+                        response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, jsonResponseEntityClass);
+                        result = this.processResponseWithData(response);
+                    }
+                }
+            } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
+                this.responseStatus = e.getStatusCode();
+                failure = e;
+                e.printStackTrace();
+                this.result = false;
+            }
+        } catch (Exception e) {
+            failure = e;
+            e.printStackTrace();
+            this.result = false;
+        }
 
     }
 
