@@ -27,7 +27,17 @@ public class EasyRestCall<T extends sendRestData, X> extends GenericRestCall<T, 
 
         super.setEntity(entity);
         try{
-            if(entity.getRestContainer().getMyRequestHeaders() != null) this.setRequestHeaders(entity.getRestContainer().getMyRequestHeaders());
+            if(entity.getRestContainer().getMyRequestHeaders() != null) {
+
+                if(getRequestHeaders()!=null && !getRequestHeaders().isEmpty()){
+                    for(String s: entity.getRestContainer().getMyRequestHeaders().keySet()){
+                        getRequestHeaders().put(s, entity.getRestContainer().getMyRequestHeaders().get(s));
+                    }
+                }
+                else{
+                    this.setRequestHeaders(entity.getRestContainer().getMyRequestHeaders());
+                }
+            }
         }
         catch(NullPointerException e){
             e.printStackTrace();

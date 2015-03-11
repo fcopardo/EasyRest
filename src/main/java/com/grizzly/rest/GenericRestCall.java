@@ -31,6 +31,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.OkHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -38,10 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Rest class based on the Spring RestTemplate. Allows to send T objects, and retrieves a X result. All classes
@@ -262,6 +260,34 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         }
         else {
             methodToCall = fixedMethod;
+        }
+    }
+
+
+    public void addUrlParams(Map<String, Object> urlParameters) {
+
+        if(urlParameters != null && !urlParameters.isEmpty()){
+            String customUrl = getUrl();
+            StringBuilder builder = new StringBuilder();
+
+            String separator = "?";
+
+            builder.append(customUrl);
+            for(String key: urlParameters.keySet()){
+                Object value = urlParameters.get(key);
+
+                if(value.toString().contains(" ")){
+                    value = value.toString().replace(" ", "+");
+                }
+
+                builder.append(separator);
+                builder.append(key);
+                builder.append("=");
+                builder.append(value);
+
+                separator = "&";
+            }
+            setUrl(builder.toString());
         }
     }
 
@@ -545,7 +571,15 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                             result = true;
                         }
                         else{
-                            response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
+                            for(String s: getRequestHeaders().keySet()){
+                                System.out.println("GET- "+s);
+                            }
+                            if(entityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                                response = restTemplate.exchange(url, HttpMethod.GET, null, jsonResponseEntityClass);
+                            }
+                            else{
+                                response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
+                            }
                             result = this.processResponseWithData(response);
                         }
                     }
@@ -558,6 +592,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 failure = e;
+                System.out.println("Error-");
                 e.printStackTrace();
                 this.result = false;
             }
