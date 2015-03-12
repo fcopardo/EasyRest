@@ -530,6 +530,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 }
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
+                System.out.println("BAD:"+e.getResponseBodyAsString());
                 failure = e;
                 e.printStackTrace();
                 this.result = false;
@@ -782,6 +783,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
         if (this.getMethodToCall()==DefinitionsHttpMethods.METHOD_DELETE) {
             this.doDelete();
+        }
+
+        if (this.getMethodToCall()==HttpMethod.PUT) {
+            this.doPut();
         }
         return this.result;
     }
