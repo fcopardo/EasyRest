@@ -35,6 +35,7 @@ public class WebServiceFactory implements CacheProvider{
     private HttpHeaders responseHeaders = new HttpHeaders();
     private Context context = null;
     private long globalCacheTime = 899999;
+    private int timeOutValue = 60000;
     private static HashMap<String, String> cachedRequests = new HashMap<>();
 
 
@@ -72,6 +73,15 @@ public class WebServiceFactory implements CacheProvider{
         globalCacheTime = time;
     }
 
+    public void setTimeOutValue(int miliseconds){
+        if(miliseconds>=0){
+            timeOutValue = miliseconds;
+        }
+        else{
+            throw new IllegalArgumentException("The timeout must be greater than zero");
+        }
+    }
+
     public WebServiceFactory() {
     }
 
@@ -103,12 +113,8 @@ public class WebServiceFactory implements CacheProvider{
         if(requestHeaders!= null && !requestHeaders.isEmpty()){
            myRestCall.setRequestHeaders(requestHeaders);
         }
-        try{
+        myRestCall.setTimeOut(timeOutValue);
 
-        }
-        catch(NullPointerException e){
-            e.printStackTrace();
-        }
 
         return myRestCall;
     }
@@ -143,6 +149,7 @@ public class WebServiceFactory implements CacheProvider{
         if(requestHeaders!= null && !requestHeaders.isEmpty()){
             myRestCall.setRequestHeaders(requestHeaders);
         }
+        myRestCall.setTimeOut(timeOutValue);
 
         return myRestCall;
     }

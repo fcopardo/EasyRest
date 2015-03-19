@@ -109,8 +109,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             restTemplate.setRequestFactory(new OkHttpRequestFactory());
         }
         restTemplate.setRequestFactory(new OkHttpRequestFactory());
-
-
+        ((OkHttpRequestFactory)restTemplate.getRequestFactory()).setConnectTimeout(60000);
     }
 
     /**
@@ -145,6 +144,18 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         }
         if(DefinitionsHttpMethods.isHttpMethod(Method)) {
             fixedMethod = methodToCall = Method;
+        }
+    }
+
+    /**
+     * Setter for the request's timeout
+     */
+    public void setTimeOut(int miliseconds){
+        try{
+            ((OkHttpRequestFactory)restTemplate.getRequestFactory()).setConnectTimeout(60000);
+        }
+        catch(ClassCastException e){
+            System.out.println("The factory used wasn't OkHttp");
         }
     }
 
@@ -504,6 +515,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             restTemplate.setMessageConverters(messageConverters);
 
             try {
+
                 if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
                     ResponseEntity response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Void.class);
                     result = this.processResponseWithouthData(response);
@@ -530,7 +542,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 }
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
-                System.out.println("BAD:"+e.getResponseBodyAsString());
+                System.out.println("BAD:" + e.getResponseBodyAsString());
                 failure = e;
                 e.printStackTrace();
                 this.result = false;
