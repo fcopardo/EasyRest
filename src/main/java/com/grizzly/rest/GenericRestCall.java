@@ -24,6 +24,8 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
+import com.grizzly.rest.Model.afterClientTaskFailure;
+import com.grizzly.rest.Model.afterServerTaskFailure;
 import com.grizzly.rest.Model.afterTaskCompletion;
 import com.grizzly.rest.Model.afterTaskFailure;
 import org.springframework.http.*;
@@ -56,6 +58,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     public static final String JSON = "application/json";
     public static final String XML = "application/xml";
 
+    private static final int ERROR = 1;
+    private static final int SERVER_ERROR = 2;
+    private static final int CLIENT_ERROR = 3;
+
     /**
      * Class members
      * T: the Entity representing the data to be sent.
@@ -75,12 +81,20 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private boolean result = false;
     private HttpMethod fixedMethod;
     private boolean noReturn = false;
+
     private afterTaskCompletion<X> taskCompletion;
     private afterTaskFailure<X> taskFailure;
+    private afterServerTaskFailure<X> serverTaskFailure;
+    private afterClientTaskFailure<X> clientTaskFailure;
+
+    private int errorType = 0;
+
     private Activity activity;
     private String waitingMessage;
     private ProgressDialog pd = null;
     private Exception failure;
+    private HttpServerErrorException serverFailure;
+    private HttpClientErrorException clientFailure;
     private boolean bodyless = false;
     private Context context = null;
     private String cachedFileName = "";
@@ -340,6 +354,22 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         this.taskFailure = taskFailure;
     }
 
+    /**
+     * Interface to be executed when a server error occurs.
+     * @param serverTaskFailure an instance of the afterServerTaskFailure interface
+     */
+    public void setServerTaskFailure(afterServerTaskFailure<X> serverTaskFailure) {
+        this.serverTaskFailure = serverTaskFailure;
+    }
+
+    /**
+     * Interface to be executed when a client error arises.
+     * @param clientTaskFailure an instance of the afterClientTaskFailure interface
+     */
+    public void setClientTaskFailure(afterClientTaskFailure<X> clientTaskFailure) {
+        this.clientTaskFailure = clientTaskFailure;
+    }
+
     public void setActivity(Activity activity) {
         this.activity = activity;
     }
@@ -546,11 +576,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 failure = e;
                 e.printStackTrace();
                 this.result = false;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName()))errorType = CLIENT_ERROR;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName()))errorType = SERVER_ERROR;
             }
         } catch (Exception e) {
             failure = e;
             e.printStackTrace();
             this.result = false;
+            errorType = ERROR;
         }
 
     }
@@ -604,15 +637,18 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
+                System.out.println("BAD:" + e.getResponseBodyAsString());
                 failure = e;
-                System.out.println("Error-");
                 e.printStackTrace();
                 this.result = false;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName()))errorType = CLIENT_ERROR;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName()))errorType = SERVER_ERROR;
             }
         } catch (Exception e) {
             failure = e;
             e.printStackTrace();
             this.result = false;
+            errorType = ERROR;
         }
     }
 
@@ -640,13 +676,18 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 }
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
+                System.out.println("BAD:" + e.getResponseBodyAsString());
                 failure = e;
                 e.printStackTrace();
                 this.result = false;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName()))errorType = CLIENT_ERROR;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName()))errorType = SERVER_ERROR;
             }
         } catch (Exception e) {
+            failure = e;
             e.printStackTrace();
             this.result = false;
+            errorType = ERROR;
         }
 
     }
@@ -680,14 +721,18 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 }
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
+                System.out.println("BAD:" + e.getResponseBodyAsString());
                 failure = e;
                 e.printStackTrace();
                 this.result = false;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName()))errorType = CLIENT_ERROR;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName()))errorType = SERVER_ERROR;
             }
         } catch (Exception e) {
             failure = e;
             e.printStackTrace();
             this.result = false;
+            errorType = ERROR;
         }
 
     }
@@ -738,14 +783,18 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 }
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
+                System.out.println("BAD:" + e.getResponseBodyAsString());
                 failure = e;
                 e.printStackTrace();
                 this.result = false;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName()))errorType = CLIENT_ERROR;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName()))errorType = SERVER_ERROR;
             }
         } catch (Exception e) {
             failure = e;
             e.printStackTrace();
             this.result = false;
+            errorType = ERROR;
         }
 
     }
@@ -837,7 +886,79 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 }
             }
             else{
-                if(taskFailure != null){
+
+                switch (errorType){
+                    case ERROR:
+                        if(taskFailure != null){
+                            try {
+                                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                                    taskFailure.onTaskFailed(null, failure);
+                                }
+                                else{
+                                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                                }
+
+                            } catch (InstantiationException e) {
+                                e.printStackTrace();
+                            } catch (IllegalAccessException e) {
+                                //e.printStackTrace();
+                            }
+                        }
+                        break;
+                    case SERVER_ERROR:
+                        if(serverTaskFailure != null){
+                            try {
+                                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                                    serverTaskFailure.onServerTaskFailed(null, serverFailure);
+                                }
+                                else{
+                                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                                }
+
+                            } catch (InstantiationException e) {
+                                e.printStackTrace();
+                            } catch (IllegalAccessException e) {
+                                //e.printStackTrace();
+                            }
+                        }
+                        break;
+                    case CLIENT_ERROR:
+                        if(clientTaskFailure != null){
+                            try {
+                                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                                    clientTaskFailure.onClientTaskFailed(null, clientFailure);
+                                }
+                                else{
+                                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                                }
+
+                            } catch (InstantiationException e) {
+                                e.printStackTrace();
+                            } catch (IllegalAccessException e) {
+                                //e.printStackTrace();
+                            }
+                        }
+                        break;
+                    default:
+                        if(taskFailure != null){
+                            try {
+                                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                                    taskFailure.onTaskFailed(null, failure);
+                                }
+                                else{
+                                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                                }
+
+                            } catch (InstantiationException e) {
+                                e.printStackTrace();
+                            } catch (IllegalAccessException e) {
+                                //e.printStackTrace();
+                            }
+                        }
+                        break;
+                }
+
+                if(serverFailure==null && clientFailure == null && taskFailure != null && errorType != ERROR){
                     try {
                         if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
                             taskFailure.onTaskFailed(null, failure);
@@ -852,6 +973,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                         //e.printStackTrace();
                     }
                 }
+
             }
         }
         context = null;
