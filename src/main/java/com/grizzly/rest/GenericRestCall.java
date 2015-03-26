@@ -904,6 +904,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                                 //e.printStackTrace();
                             }
                         }
+
                         break;
                     case SERVER_ERROR:
                         if(serverTaskFailure != null){
@@ -921,6 +922,25 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                                 //e.printStackTrace();
                             }
                         }
+
+                        else{
+                            if(taskFailure != null){
+                                try {
+                                    if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                                        taskFailure.onTaskFailed(null, failure);
+                                    }
+                                    else{
+                                        taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                                    }
+
+                                } catch (InstantiationException e) {
+                                    e.printStackTrace();
+                                } catch (IllegalAccessException e) {
+                                    //e.printStackTrace();
+                                }
+                            }
+                        }
+
                         break;
                     case CLIENT_ERROR:
                         if(clientTaskFailure != null){
@@ -938,6 +958,25 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                                 //e.printStackTrace();
                             }
                         }
+
+                        else{
+                            if(taskFailure != null){
+                                try {
+                                    if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                                        taskFailure.onTaskFailed(null, failure);
+                                    }
+                                    else{
+                                        taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                                    }
+
+                                } catch (InstantiationException e) {
+                                    e.printStackTrace();
+                                } catch (IllegalAccessException e) {
+                                    //e.printStackTrace();
+                                }
+                            }
+                        }
+
                         break;
                     default:
                         if(taskFailure != null){
@@ -957,23 +996,6 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                         }
                         break;
                 }
-
-                if(serverFailure==null && clientFailure == null && taskFailure != null && errorType != ERROR){
-                    try {
-                        if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                            taskFailure.onTaskFailed(null, failure);
-                        }
-                        else{
-                            taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
-                        }
-
-                    } catch (InstantiationException e) {
-                        e.printStackTrace();
-                    } catch (IllegalAccessException e) {
-                        //e.printStackTrace();
-                    }
-                }
-
             }
         }
         context = null;
