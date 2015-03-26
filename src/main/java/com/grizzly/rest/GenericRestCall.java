@@ -913,7 +913,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                                     serverTaskFailure.onServerTaskFailed(null, serverFailure);
                                 }
                                 else{
-                                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                                    serverTaskFailure.onServerTaskFailed(jsonResponseEntityClass.newInstance(), serverFailure);
                                 }
 
                             } catch (InstantiationException e) {
@@ -949,7 +949,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                                     clientTaskFailure.onClientTaskFailed(null, clientFailure);
                                 }
                                 else{
-                                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                                    clientTaskFailure.onClientTaskFailed(jsonResponseEntityClass.newInstance(), clientFailure);
                                 }
 
                             } catch (InstantiationException e) {
