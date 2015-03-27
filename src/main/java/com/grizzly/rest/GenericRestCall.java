@@ -576,8 +576,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 failure = e;
                 e.printStackTrace();
                 this.result = false;
-                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName()))errorType = CLIENT_ERROR;
-                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName()))errorType = SERVER_ERROR;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())){
+                    errorType = CLIENT_ERROR;
+                    clientFailure = (HttpClientErrorException) e;
+                }
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName())){
+                    errorType = SERVER_ERROR;
+                    serverFailure = (HttpServerErrorException) e;
+                }
             }
         } catch (Exception e) {
             failure = e;
@@ -641,8 +647,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 failure = e;
                 e.printStackTrace();
                 this.result = false;
-                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName()))errorType = CLIENT_ERROR;
-                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName()))errorType = SERVER_ERROR;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())){
+                    errorType = CLIENT_ERROR;
+                    clientFailure = (HttpClientErrorException) e;
+                }
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName())){
+                    errorType = SERVER_ERROR;
+                    serverFailure = (HttpServerErrorException) e;
+                }
             }
         } catch (Exception e) {
             failure = e;
@@ -680,8 +692,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 failure = e;
                 e.printStackTrace();
                 this.result = false;
-                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName()))errorType = CLIENT_ERROR;
-                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName()))errorType = SERVER_ERROR;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())){
+                    errorType = CLIENT_ERROR;
+                    clientFailure = (HttpClientErrorException) e;
+                }
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName())){
+                    errorType = SERVER_ERROR;
+                    serverFailure = (HttpServerErrorException) e;
+                }
             }
         } catch (Exception e) {
             failure = e;
@@ -725,8 +743,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 failure = e;
                 e.printStackTrace();
                 this.result = false;
-                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName()))errorType = CLIENT_ERROR;
-                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName()))errorType = SERVER_ERROR;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())){
+                    errorType = CLIENT_ERROR;
+                    clientFailure = (HttpClientErrorException) e;
+                }
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName())){
+                    errorType = SERVER_ERROR;
+                    serverFailure = (HttpServerErrorException) e;
+                }
             }
         } catch (Exception e) {
             failure = e;
@@ -787,8 +811,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 failure = e;
                 e.printStackTrace();
                 this.result = false;
-                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName()))errorType = CLIENT_ERROR;
-                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName()))errorType = SERVER_ERROR;
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())){
+                    errorType = CLIENT_ERROR;
+                    clientFailure = (HttpClientErrorException) e;
+                }
+                if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName())){
+                    errorType = SERVER_ERROR;
+                    serverFailure = (HttpServerErrorException) e;
+                }
             }
         } catch (Exception e) {
             failure = e;
@@ -887,115 +917,55 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             }
             else{
 
-                switch (errorType){
-                    case ERROR:
-                        if(taskFailure != null){
-                            try {
-                                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                                    taskFailure.onTaskFailed(null, failure);
-                                }
-                                else{
-                                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
-                                }
-
-                            } catch (InstantiationException e) {
-                                e.printStackTrace();
-                            } catch (IllegalAccessException e) {
-                                //e.printStackTrace();
-                            }
+                if(serverTaskFailure != null){
+                    try {
+                        if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                            serverTaskFailure.onServerTaskFailed(null, serverFailure);
                         }
-
-                        break;
-                    case SERVER_ERROR:
-                        if(serverTaskFailure != null){
-                            try {
-                                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                                    serverTaskFailure.onServerTaskFailed(null, serverFailure);
-                                }
-                                else{
-                                    serverTaskFailure.onServerTaskFailed(jsonResponseEntityClass.newInstance(), serverFailure);
-                                }
-
-                            } catch (InstantiationException e) {
-                                e.printStackTrace();
-                            } catch (IllegalAccessException e) {
-                                //e.printStackTrace();
-                            }
-                        }
-
                         else{
-                            if(taskFailure != null){
-                                try {
-                                    if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                                        taskFailure.onTaskFailed(null, failure);
-                                    }
-                                    else{
-                                        taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
-                                    }
-
-                                } catch (InstantiationException e) {
-                                    e.printStackTrace();
-                                } catch (IllegalAccessException e) {
-                                    //e.printStackTrace();
-                                }
-                            }
+                            serverTaskFailure.onServerTaskFailed(jsonResponseEntityClass.newInstance(), serverFailure);
                         }
 
-                        break;
-                    case CLIENT_ERROR:
-                        if(clientTaskFailure != null){
-                            try {
-                                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                                    clientTaskFailure.onClientTaskFailed(null, clientFailure);
-                                }
-                                else{
-                                    clientTaskFailure.onClientTaskFailed(jsonResponseEntityClass.newInstance(), clientFailure);
-                                }
-
-                            } catch (InstantiationException e) {
-                                e.printStackTrace();
-                            } catch (IllegalAccessException e) {
-                                //e.printStackTrace();
-                            }
-                        }
-
-                        else{
-                            if(taskFailure != null){
-                                try {
-                                    if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                                        taskFailure.onTaskFailed(null, failure);
-                                    }
-                                    else{
-                                        taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
-                                    }
-
-                                } catch (InstantiationException e) {
-                                    e.printStackTrace();
-                                } catch (IllegalAccessException e) {
-                                    //e.printStackTrace();
-                                }
-                            }
-                        }
-
-                        break;
-                    default:
-                        if(taskFailure != null){
-                            try {
-                                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                                    taskFailure.onTaskFailed(null, failure);
-                                }
-                                else{
-                                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
-                                }
-
-                            } catch (InstantiationException e) {
-                                e.printStackTrace();
-                            } catch (IllegalAccessException e) {
-                                //e.printStackTrace();
-                            }
-                        }
-                        break;
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        //e.printStackTrace();
+                    }
                 }
+
+                if(clientTaskFailure != null){
+                    try {
+                        if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                            clientTaskFailure.onClientTaskFailed(null, clientFailure);
+                        }
+                        else{
+                            clientTaskFailure.onClientTaskFailed(jsonResponseEntityClass.newInstance(), clientFailure);
+                        }
+
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        //e.printStackTrace();
+                    }
+                }
+
+                if(taskFailure != null && clientTaskFailure==null && serverTaskFailure==null){
+                    try {
+                        if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                            taskFailure.onTaskFailed(null, failure);
+                        }
+                        else{
+                            taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                        }
+
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        //e.printStackTrace();
+                    }
+                }
+
+
             }
         }
         context = null;
