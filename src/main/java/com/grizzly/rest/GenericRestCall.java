@@ -965,7 +965,6 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                     }
                 }
 
-
             }
         }
         context = null;
