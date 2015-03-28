@@ -35,12 +35,14 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.*;
 
 /**
@@ -95,6 +97,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private Exception failure;
     private HttpServerErrorException serverFailure;
     private HttpClientErrorException clientFailure;
+    private ResourceAccessException connectionException;
     private boolean bodyless = false;
     private Context context = null;
     private String cachedFileName = "";
@@ -592,6 +595,15 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                     serverFailure = (HttpServerErrorException) e;
                 }
             }
+            catch(org.springframework.web.client.ResourceAccessException e){
+                failure = e;
+                connectionException = e;
+                errorType = ERROR;
+                System.out.println("The error was caused by the body "+entityClass.getCanonicalName());
+                System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
+                System.out.println(" in the url " + url);
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             failure = e;
             System.out.println("The error was caused by the body "+entityClass.getCanonicalName());
@@ -618,40 +630,47 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             try {
                 HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
 
-                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                if (jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())) {
                     ResponseEntity response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, Void.class);
                     result = this.processResponseWithouthData(response);
-                }
-                else{
+                } else {
                     ResponseEntity<X> response = null;
 
-                    if(context !=null){
+                    if (context != null) {
                         File f = new File(getCachedFileName());
 
-                        if(f.exists() && ((enableCache && Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime) || !EasyRest.checkConnectivity(getContext()))) {
+                        if (f.exists() && ((enableCache && Calendar.getInstance(Locale.getDefault()).getTimeInMillis() - f.lastModified() <= cacheTime) || !EasyRest.checkConnectivity(getContext()))) {
                             getFromSolidCache();
                             result = true;
-                        }
-                        else{
-                            for(String s: getRequestHeaders().keySet()){
-                                System.out.println("GET- "+s);
+                        } else {
+                            for (String s : getRequestHeaders().keySet()) {
+                                System.out.println("GET- " + s);
                             }
-                            if(entityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                            if (entityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())) {
                                 response = restTemplate.exchange(url, HttpMethod.GET, null, jsonResponseEntityClass);
-                            }
-                            else{
+                            } else {
                                 response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
                             }
                             result = this.processResponseWithData(response);
                         }
-                    }
-                    else{
+                    } else {
                         response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
                         result = this.processResponseWithData(response);
                     }
                 }
 
-            } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
+            }
+            catch(org.springframework.web.client.ResourceAccessException e) {
+
+                failure = e;
+                System.out.println("The error was caused by the body "+entityClass.getCanonicalName());
+                System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
+                System.out.println(" in the url " + url);
+                e.printStackTrace();
+                this.result = false;
+                errorType = ERROR;
+
+            } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e ) {
                 this.responseStatus = e.getStatusCode();
                 System.out.println("BAD:" + e.getResponseBodyAsString());
                 failure = e;
@@ -948,64 +967,70 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 if(getFromSolidCache()){
                     taskCompletion.onTaskCompleted(jsonResponseEntity);
                 }
+                else{
+                    errorExecution();
+                }
             }
             else{
-                boolean executed = false;
-
-                if(serverTaskFailure != null && !executed){
-                    try {
-                        if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                            serverTaskFailure.onServerTaskFailed(null, serverFailure);
-                        }
-                        else{
-                            serverTaskFailure.onServerTaskFailed(jsonResponseEntityClass.newInstance(), serverFailure);
-                        }
-
-                    } catch (InstantiationException e) {
-                        e.printStackTrace();
-                    } catch (IllegalAccessException e) {
-                        //e.printStackTrace();
-                    }
-                    executed = true;
-                }
-
-                if(clientTaskFailure != null && !executed){
-                    try {
-                        if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                            clientTaskFailure.onClientTaskFailed(null, clientFailure);
-                        }
-                        else{
-                            clientTaskFailure.onClientTaskFailed(jsonResponseEntityClass.newInstance(), clientFailure);
-                        }
-
-                    } catch (InstantiationException e) {
-                        e.printStackTrace();
-                    } catch (IllegalAccessException e) {
-                        //e.printStackTrace();
-                    }
-                    executed = true;
-                }
-
-                if(taskFailure != null && !executed){
-                    try {
-                        if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                            taskFailure.onTaskFailed(null, failure);
-                        }
-                        else{
-                            taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
-                        }
-
-                    } catch (InstantiationException e) {
-                        e.printStackTrace();
-                    } catch (IllegalAccessException e) {
-                        //e.printStackTrace();
-                    }
-                    executed = true;
-                }
-
+                errorExecution();
             }
         }
         context = null;
+    }
+
+    private void errorExecution(){
+        boolean executed = false;
+
+        if(serverTaskFailure != null && !executed){
+            try {
+                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                    serverTaskFailure.onServerTaskFailed(null, serverFailure);
+                }
+                else{
+                    serverTaskFailure.onServerTaskFailed(jsonResponseEntityClass.newInstance(), serverFailure);
+                }
+
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                //e.printStackTrace();
+            }
+            executed = true;
+        }
+
+        if(clientTaskFailure != null && !executed){
+            try {
+                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                    clientTaskFailure.onClientTaskFailed(null, clientFailure);
+                }
+                else{
+                    clientTaskFailure.onClientTaskFailed(jsonResponseEntityClass.newInstance(), clientFailure);
+                }
+
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                //e.printStackTrace();
+            }
+            executed = true;
+        }
+
+        if(taskFailure != null && !executed){
+            try {
+                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                    taskFailure.onTaskFailed(null, failure);
+                }
+                else{
+                    taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
+                }
+
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                //e.printStackTrace();
+            }
+            executed = true;
+        }
     }
 
 }
