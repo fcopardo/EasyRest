@@ -24,10 +24,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
-import com.grizzly.rest.Model.afterClientTaskFailure;
-import com.grizzly.rest.Model.afterServerTaskFailure;
-import com.grizzly.rest.Model.afterTaskCompletion;
-import com.grizzly.rest.Model.afterTaskFailure;
+import com.grizzly.rest.Model.*;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.OkHttpRequestFactory;
@@ -461,9 +458,12 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     String getCachedFileName(){
 
         if(cachedFileName.isEmpty() || cachedFileName.equalsIgnoreCase("")){
-            return getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
+
+            String fileName = getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
                     + jsonResponseEntityClass.getSimpleName()
                     +getURI().getAuthority()+getURI().getPath().replace("/", "_")+getURI().getQuery();
+
+            return fileName;
         }
         System.out.println("CACHE: "+cachedFileName);
         return cachedFileName;
@@ -500,20 +500,25 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 this.responseStatus = HttpStatus.OK;
                 return true;
             }
+            System.out.println("EasyRest - Cache Failure - FileName: "+ getCachedFileName());
         } catch (JsonGenerationException e) {
 
+            this.failure = e;
             e.printStackTrace();
 
         } catch (JsonMappingException e) {
 
+            this.failure = e;
             e.printStackTrace();
 
         } catch (IOException e) {
 
+            this.failure = e;
             e.printStackTrace();
 
         }
         catch(NullPointerException e){
+            this.failure = e;
             e.printStackTrace();
         }
         return false;
@@ -639,36 +644,26 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                     if (context != null) {
                         File f = new File(getCachedFileName());
 
-                        if (f.exists() && ((enableCache && Calendar.getInstance(Locale.getDefault()).getTimeInMillis() - f.lastModified() <= cacheTime) || !EasyRest.checkConnectivity(getContext()))) {
+                        if(f.exists() && ((enableCache && Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime) || !EasyRest.checkConnectivity(getContext()))) {
                             getFromSolidCache();
                             result = true;
+                            System.out.println("EasyRest - We got from cache!");
                         } else {
-                            for (String s : getRequestHeaders().keySet()) {
-                                System.out.println("GET- " + s);
-                            }
-                            if (entityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())) {
+                            /*if (entityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())) {
                                 response = restTemplate.exchange(url, HttpMethod.GET, null, jsonResponseEntityClass);
                             } else {
                                 response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
-                            }
+                            }*/
+                            response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
                             result = this.processResponseWithData(response);
+                            System.out.println("EasyRest - We got from service, cache failed!");
                         }
                     } else {
                         response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
                         result = this.processResponseWithData(response);
+                        System.out.println("EasyRest - We got from service, we had no cache!");
                     }
                 }
-
-            }
-            catch(org.springframework.web.client.ResourceAccessException e) {
-
-                failure = e;
-                System.out.println("The error was caused by the body "+entityClass.getCanonicalName());
-                System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
-                System.out.println(" in the url " + url);
-                e.printStackTrace();
-                this.result = false;
-                errorType = ERROR;
 
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e ) {
                 this.responseStatus = e.getStatusCode();
