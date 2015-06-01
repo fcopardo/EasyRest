@@ -15,8 +15,8 @@
  */
 package com.grizzly.rest;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -40,7 +40,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.util.*;
 
 /**
@@ -102,7 +101,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private boolean enableCache = true;
     private CacheProvider cacheProvider = null;
     private long cacheTime = 899999;
-    private boolean callDelayed = false;
+    private boolean reprocessWhenRefreshing = false;
     private boolean automaticCacheRefresh = false;
 
     /**
@@ -540,8 +539,8 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         cacheTime = time;
     }
 
-    public void setCallDelayed(boolean callDelayed) {
-        this.callDelayed = callDelayed;
+    public void setReprocessWhenRefreshing(boolean reprocessWhenRefreshing) {
+        this.reprocessWhenRefreshing = reprocessWhenRefreshing;
     }
 
     public void setAutomaticCacheRefresh(boolean automaticCacheRefresh) {
@@ -581,7 +580,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                         File f = new File(getCachedFileName());
                         if(f.exists() && ((enableCache && Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime) || !EasyRest.checkConnectivity(getContext()))) {
                             getFromSolidCache();
-                            if(this.automaticCacheRefresh)this.createDelayedCall(callDelayed);
+                            if(this.automaticCacheRefresh)this.createDelayedCall(reprocessWhenRefreshing);
                             result = true;
                         }
                         else{
@@ -658,7 +657,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
                         if(f.exists() && ((enableCache && Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime) || !EasyRest.checkConnectivity(getContext()))) {
                             getFromSolidCache();
-                            if(this.automaticCacheRefresh)this.createDelayedCall(callDelayed);
+                            if(this.automaticCacheRefresh)this.createDelayedCall(reprocessWhenRefreshing);
                             result = true;
                             System.out.println("EasyRest - We got from cache!");
                         } else {
@@ -848,7 +847,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                         File f = new File(getCachedFileName());
                         if(f.exists() && ((enableCache && Calendar.getInstance(Locale.getDefault()).getTimeInMillis()-f.lastModified()<=cacheTime) || !EasyRest.checkConnectivity(getContext()))) {
                             getFromSolidCache();
-                            if(this.automaticCacheRefresh)this.createDelayedCall(callDelayed);
+                            if(this.automaticCacheRefresh)this.createDelayedCall(reprocessWhenRefreshing);
                             result = true;
                         }
                         else{
@@ -1042,8 +1041,13 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void createDelayedCall(boolean enableDelayedReprocess){
-        GenericRestCall<T, X> delayedCall = this;
+        GenericRestCall<T, X> delayedCall = new GenericRestCall(entityClass, jsonResponseEntityClass);
+        delayedCall.setMethodToCall(this.methodToCall);
+        delayedCall.setUrl(this.getUrl());
+        delayedCall.setRequestHeaders(this.getRequestHeaders());
+        if(entity!=null && !entityClass.getClass().getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())) delayedCall.setEntity(this.entity);
         delayedCall.setCacheTime(0L);
         if(!enableDelayedReprocess){
             delayedCall.setTaskCompletion(null);
@@ -1051,6 +1055,13 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             delayedCall.setClientTaskFailure(null);
             delayedCall.setServerTaskFailure(null);
             delayedCall.setActivity(null);
+        }
+        else{
+            if(taskCompletion!=null) delayedCall.setTaskCompletion(this.taskCompletion);
+            if(taskFailure!=null) delayedCall.setTaskFailure(this.taskFailure);
+            if(clientTaskFailure!=null) delayedCall.setClientTaskFailure(this.clientTaskFailure);
+            if(serverTaskFailure!=null) delayedCall.setServerTaskFailure(this.serverTaskFailure);
+            if(activity!=null) delayedCall.setActivity(this.activity);
         }
         if(getContext()!=null)delayedCall.setContext(context.getApplicationContext());
         delayedCall.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
