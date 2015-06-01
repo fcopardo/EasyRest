@@ -265,6 +265,7 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
         restCall.setContext(getContext());
         restCall.setUrl("www.google.cl");
         restCall.setMethodToCall(DefinitionsHttpMethods.METHOD_POST);
+        restCall.setAutomaticCacheRefresh(true);
 
         try {
 
