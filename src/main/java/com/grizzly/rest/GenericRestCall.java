@@ -76,7 +76,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private HttpMethod methodToCall;
     private HttpHeaders requestHeaders = new HttpHeaders();
     private HttpHeaders responseHeaders;
-    private HttpStatus responseStatus;
+    private HttpStatus responseStatus = HttpStatus.I_AM_A_TEAPOT;
     private boolean result = false;
     private HttpMethod fixedMethod;
     private boolean noReturn = false;
