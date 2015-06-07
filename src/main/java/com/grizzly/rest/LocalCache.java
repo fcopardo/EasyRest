@@ -9,7 +9,7 @@ import java.util.Locale;
 /**
  * Created by fpardo on 12/15/14.
  */
-public class LocalCache implements Serializable{
+class LocalCache implements Serializable{
 
     private HashMap<String, CachedResponse> requests = new HashMap<>();
 

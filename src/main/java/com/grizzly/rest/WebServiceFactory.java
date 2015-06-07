@@ -37,6 +37,7 @@ public class WebServiceFactory implements CacheProvider{
     private long globalCacheTime = 899999;
     private int timeOutValue = 60000;
     private static HashMap<String, String> cachedRequests = new HashMap<>();
+    private String baseUrl = "";
 
 
     public HttpHeaders getRequestHeaders() {
@@ -82,6 +83,10 @@ public class WebServiceFactory implements CacheProvider{
         }
     }
 
+    public void setBaseUrl(String BaseUrl){
+        baseUrl = BaseUrl;
+    }
+
     public WebServiceFactory() {
     }
 
@@ -112,6 +117,9 @@ public class WebServiceFactory implements CacheProvider{
         }
         if(requestHeaders!= null && !requestHeaders.isEmpty()){
            myRestCall.setRequestHeaders(requestHeaders);
+        }
+        if(!baseUrl.isEmpty() && baseUrl.trim().equalsIgnoreCase("") && baseUrl != null){
+            myRestCall.setUrl(baseUrl);
         }
         myRestCall.setTimeOut(timeOutValue);
 
@@ -148,6 +156,9 @@ public class WebServiceFactory implements CacheProvider{
         }
         if(requestHeaders!= null && !requestHeaders.isEmpty()){
             myRestCall.setRequestHeaders(requestHeaders);
+        }
+        if(!baseUrl.isEmpty() && baseUrl.trim().equalsIgnoreCase("") && baseUrl != null){
+            myRestCall.setUrl(baseUrl);
         }
         myRestCall.setTimeOut(timeOutValue);
 

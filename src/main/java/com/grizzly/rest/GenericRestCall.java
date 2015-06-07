@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Rest class based on the Spring RestTemplate. Allows to send T objects, and retrieves a X result. All classes
@@ -79,12 +80,13 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private HttpStatus responseStatus = HttpStatus.I_AM_A_TEAPOT;
     private boolean result = false;
     private HttpMethod fixedMethod;
-    private boolean noReturn = false;
+    //private boolean noReturn = false;
 
     private afterTaskCompletion<X> taskCompletion;
     private afterTaskFailure<X> taskFailure;
     private afterServerTaskFailure<X> serverTaskFailure;
     private afterClientTaskFailure<X> clientTaskFailure;
+    private com.grizzly.rest.Model.commonTasks commonTasks;
 
     private int errorType = 0;
 
@@ -374,6 +376,14 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      */
     public void setClientTaskFailure(afterClientTaskFailure<X> clientTaskFailure) {
         this.clientTaskFailure = clientTaskFailure;
+    }
+
+    /**
+     * Interface to be executed after all processes are finalized, no matter the result.
+     * @param commonTasks an instance of the commonTasks interface.
+     */
+    public void setCommonTasks(com.grizzly.rest.Model.commonTasks commonTasks) {
+        this.commonTasks = commonTasks;
     }
 
     public void setActivity(Activity activity) {
@@ -983,6 +993,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 errorExecution();
             }
         }
+        if(commonTasks!=null) commonTasks.performCommonTask();
         context = null;
     }
 
@@ -1066,6 +1077,22 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         if(getContext()!=null)delayedCall.setContext(context.getApplicationContext());
         delayedCall.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void execute(boolean asynchronously){
+        if(asynchronously){
+            this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        else{
+            try {
+                this.execute().get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
