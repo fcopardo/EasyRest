@@ -29,14 +29,14 @@ public class ApiCallFactory {
         requestCollection.put(name, configuration);
     }
 
-    public <T, X> GenericRestCall<T, X> getApiCall(String requestName,
-                                                   Class<T> requestBodyType, Class<X> responseBodyType,
-                                                   afterTaskCompletion<X> taskCompletion,
-                                                   afterTaskFailure failure,
-                                                   afterClientTaskFailure clientFailure,
-                                                   afterServerTaskFailure serverFailure,
-                                                   commonTasks commonTasks
-                                                   ){
+    public <T,X> void callApiMethod(String requestName,
+                                    Class<T> requestBodyType, Class<X> responseBodyType,
+                                    afterTaskCompletion<X> taskCompletion,
+                                    afterTaskFailure failure,
+                                    afterClientTaskFailure clientFailure,
+                                    afterServerTaskFailure serverFailure,
+                                    commonTasks commonTasks,
+                                    boolean isAsyncCall){
 
         GenericRestCall<T, X> restCall = webServiceFactory.getGenericRestCallInstance(requestBodyType, responseBodyType);
         if(requestCollection.containsKey(requestName)){
@@ -54,8 +54,7 @@ public class ApiCallFactory {
         if(clientFailure!=null)restCall.setClientTaskFailure(clientFailure);
         if(serverFailure!=null)restCall.setServerTaskFailure(serverFailure);
         if(commonTasks!=null) restCall.setCommonTasks(commonTasks);
-
-        return restCall;
+        restCall.execute(isAsyncCall);
     }
 
 }
