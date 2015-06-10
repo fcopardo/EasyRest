@@ -34,7 +34,7 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
 
         WebServiceFactory webFactory = new WebServiceFactory();
 
-        EasyRestCall<BaseWebCall, TestString> restCall = webFactory.getRestCallInstance(BaseWebCall.class, TestString.class, true);
+        EasyRestCall<BaseWebCall, TestString, Void> restCall = webFactory.getRestCallInstance(BaseWebCall.class, TestString.class, true);
 
         BaseWebCall webCall = new BaseWebCall();
 
@@ -71,7 +71,7 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
 
         WebServiceFactory webFactory = new WebServiceFactory();
 
-        GenericRestCall<String, TestString> restCall = webFactory.getGenericRestCallInstance(String.class, TestString.class, true);
+        GenericRestCall<String, TestString, Void> restCall = webFactory.getGenericRestCallInstance(String.class, TestString.class, true);
 
         String webCall = "a web call with no configuration";
         Header headers = new BasicHeader("Content-type", "application/json");
@@ -106,7 +106,7 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
 
         WebServiceFactory webFactory = new WebServiceFactory();
 
-        EasyRestCall<BaseWebCall, TestString> restCall = webFactory.getRestCallInstance(BaseWebCall.class, TestString.class, true);
+        EasyRestCall<BaseWebCall, TestString, Void> restCall = webFactory.getRestCallInstance(BaseWebCall.class, TestString.class, true);
 
         BaseWebCall webCall = new BaseWebCall();
 
@@ -145,7 +145,7 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
 
         WebServiceFactory webFactory = new WebServiceFactory();
 
-        EasyRestCall<BaseWebCall, TestString> restCall = new EasyRestCall<>(BaseWebCall.class, TestString.class, 1);
+        EasyRestCall<BaseWebCall, TestString, Void> restCall = new EasyRestCall<>(BaseWebCall.class, TestString.class, Void.class, 1);
 
         BaseWebCall webCall = new BaseWebCall();
 
@@ -180,7 +180,7 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
     @Test
     public void BodylessPostTest(){
 
-        EasyRestCall<BaseWebCall, TestString> restCall = new EasyRestCall<>(BaseWebCall.class, TestString.class, 1);
+        EasyRestCall<BaseWebCall, TestString, Void> restCall = new EasyRestCall<>(BaseWebCall.class, TestString.class, Void.class, 1);
 
         BaseWebCall webCall = new BaseWebCall();
 
@@ -219,7 +219,7 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
 
         WebServiceFactory webFactory = new WebServiceFactory();
 
-        EasyRestCall<BaseWebCall, Void> restCall = webFactory.getRestCallInstance(BaseWebCall.class, Void.class, true);
+        EasyRestCall<BaseWebCall, Void, Void> restCall = webFactory.getRestCallInstance(BaseWebCall.class, Void.class, true);
 
         BaseWebCall webCall = new BaseWebCall();
 
@@ -252,7 +252,7 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
 
         WebServiceFactory webFactory = new WebServiceFactory();
 
-        GenericRestCall<String, TestString> restCall = webFactory.getGenericRestCallInstance(String.class, TestString.class, true);
+        GenericRestCall<String, TestString, Void> restCall = webFactory.getGenericRestCallInstance(String.class, TestString.class, true);
 
         String webCall = "a web call with no configuration";
         Header headers = new BasicHeader("Content-type", "application/json");
@@ -281,7 +281,7 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
         }
 
         Robolectric.clearPendingHttpResponses();
-        GenericRestCall<String, TestString> restCall2 = webFactory.getGenericRestCallInstance(String.class, TestString.class, true);
+        GenericRestCall<String, TestString, Void> restCall2 = webFactory.getGenericRestCallInstance(String.class, TestString.class, true);
         restCall2.setEntity(webCall);
         restCall2.setContext(getContext());
         restCall2.setUrl("www.google.cl");

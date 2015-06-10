@@ -5,16 +5,17 @@ import com.grizzly.rest.Model.sendRestData;
 /**
  * Created by Fco Pardo on 8/23/14.
  */
-public class EasyRestCall<T extends sendRestData, X> extends GenericRestCall<T, X>  {
+public class EasyRestCall<T extends sendRestData, X, M> extends GenericRestCall<T, X, M>  {
 
-    public EasyRestCall(Class<T> entityClass, Class<X> jsonResponseEntityClass){
 
-        super(entityClass, jsonResponseEntityClass);
+    public EasyRestCall(Class<T> entityClass, Class<X> jsonResponseEntityClass, Class<M> errorResponseEntityClass){
+
+        super(entityClass, jsonResponseEntityClass, errorResponseEntityClass);
     }
 
-    public EasyRestCall(Class<T> entityClass, Class<X> jsonResponseEntityClass, int test){
+    public EasyRestCall(Class<T> entityClass, Class<X> jsonResponseEntityClass, Class<M> errorResponseEntityClass, int test){
 
-        super(entityClass, jsonResponseEntityClass, test);
+        super(entityClass, jsonResponseEntityClass, errorResponseEntityClass, test);
     }
 
     /**

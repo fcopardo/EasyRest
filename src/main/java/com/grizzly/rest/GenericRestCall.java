@@ -22,10 +22,13 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
 import com.grizzly.rest.Model.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.OkHttpRequestFactory;
@@ -49,7 +52,7 @@ import java.util.concurrent.ExecutionException;
  *
  * @author Fco Pardo
  */
-public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
+public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
     /**
      * Constants for method calls
@@ -58,9 +61,9 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     public static final String JSON = "application/json";
     public static final String XML = "application/xml";
 
-    private static final int ERROR = 1;
+    /*private static final int ERROR = 1;
     private static final int SERVER_ERROR = 2;
-    private static final int CLIENT_ERROR = 3;
+    private static final int CLIENT_ERROR = 3;*/
 
     /**
      * Class members
@@ -69,6 +72,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      */
     private Class<T> entityClass;
     private Class<X> jsonResponseEntityClass;
+    private Class<M> errorResponseEntityClass;
     private T entity;
     private X jsonResponseEntity;
     private String singleArgument;
@@ -84,11 +88,11 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
     private afterTaskCompletion<X> taskCompletion;
     private afterTaskFailure<X> taskFailure;
-    private afterServerTaskFailure<X> serverTaskFailure;
-    private afterClientTaskFailure<X> clientTaskFailure;
+    private afterServerTaskFailure<M> serverTaskFailure;
+    private afterClientTaskFailure<M> clientTaskFailure;
     private com.grizzly.rest.Model.commonTasks commonTasks;
 
-    private int errorType = 0;
+    //private int //errorType = 0;
 
     private Activity activity;
     private String waitingMessage;
@@ -105,6 +109,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     private long cacheTime = 899999;
     private boolean reprocessWhenRefreshing = false;
     private boolean automaticCacheRefresh = false;
+    private String errorResponse = "";
 
     /**
      * Base constructor.
@@ -112,9 +117,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      * @param EntityClass
      * @param JsonResponseEntityClass
      */
-    public GenericRestCall(Class<T> EntityClass, Class<X> JsonResponseEntityClass) {
+    public GenericRestCall(Class<T> EntityClass, Class<X> JsonResponseEntityClass, Class<M> ErrorResponseEntityClass) {
         this.entityClass = EntityClass;
         this.jsonResponseEntityClass = JsonResponseEntityClass;
+        this.errorResponseEntityClass = ErrorResponseEntityClass;
         requestHeaders.setContentType(MediaType.APPLICATION_JSON);
 
         /**
@@ -139,9 +145,10 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      * @param EntityClass
      * @param JsonResponseEntityClass
      */
-    public GenericRestCall(Class<T> EntityClass, Class<X> JsonResponseEntityClass, int test) {
+    public GenericRestCall(Class<T> EntityClass, Class<X> JsonResponseEntityClass, Class<M> ErrorResponseEntityClass, int test) {
         this.entityClass = EntityClass;
         this.jsonResponseEntityClass = JsonResponseEntityClass;
+        this.errorResponseEntityClass = ErrorResponseEntityClass;
         requestHeaders.setContentType(MediaType.APPLICATION_JSON);
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
     }
@@ -275,6 +282,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     }
 
     public HttpStatus getResponseStatus() {
+        if(responseStatus==null) responseStatus = HttpStatus.I_AM_A_TEAPOT;
         return responseStatus;
     }
 
@@ -366,7 +374,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      * Interface to be executed when a server error occurs.
      * @param serverTaskFailure an instance of the afterServerTaskFailure interface
      */
-    public void setServerTaskFailure(afterServerTaskFailure<X> serverTaskFailure) {
+    public void setServerTaskFailure(afterServerTaskFailure<M> serverTaskFailure) {
         this.serverTaskFailure = serverTaskFailure;
     }
 
@@ -374,7 +382,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
      * Interface to be executed when a client error arises.
      * @param clientTaskFailure an instance of the afterClientTaskFailure interface
      */
-    public void setClientTaskFailure(afterClientTaskFailure<X> clientTaskFailure) {
+    public void setClientTaskFailure(afterClientTaskFailure<M> clientTaskFailure) {
         this.clientTaskFailure = clientTaskFailure;
     }
 
@@ -477,7 +485,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
             return fileName;
         }
-        System.out.println("CACHE: "+cachedFileName);
+        System.out.println("CACHE: " + cachedFileName);
         return cachedFileName;
     }
 
@@ -500,7 +508,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         ObjectMapper mapper = new ObjectMapper();
 
         if(cacheProvider!=null){
-            cacheProvider.setCache(this, jsonResponseEntityClass, entityClass);
+            cacheProvider.setCache(this, jsonResponseEntityClass, entityClass, errorResponseEntityClass);
         }
 
         try {
@@ -606,6 +614,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 System.out.println("BAD:" + e.getResponseBodyAsString());
+                errorResponse = e.getResponseBodyAsString();
                 failure = e;
                 System.out.println("The error was caused by the body "+entityClass.getCanonicalName());
                 System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
@@ -613,18 +622,18 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 e.printStackTrace();
                 this.result = false;
                 if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())){
-                    errorType = CLIENT_ERROR;
+                    //errorType = CLIENT_ERROR;
                     clientFailure = (HttpClientErrorException) e;
                 }
                 if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName())){
-                    errorType = SERVER_ERROR;
+                    //errorType = SERVER_ERROR;
                     serverFailure = (HttpServerErrorException) e;
                 }
             }
             catch(org.springframework.web.client.ResourceAccessException e){
                 failure = e;
                 connectionException = e;
-                errorType = ERROR;
+                //errorType = ERROR;
                 System.out.println("The error was caused by the body "+entityClass.getCanonicalName());
                 System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
                 System.out.println(" in the url " + url);
@@ -637,7 +646,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             System.out.println(" in the url " + url);
             e.printStackTrace();
             this.result = false;
-            errorType = ERROR;
+            //errorType = ERROR;
         }
 
     }
@@ -690,6 +699,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e ) {
                 this.responseStatus = e.getStatusCode();
                 System.out.println("BAD:" + e.getResponseBodyAsString());
+                errorResponse = e.getResponseBodyAsString();
                 failure = e;
                 System.out.println("The error was caused by the body "+entityClass.getCanonicalName());
                 System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
@@ -697,11 +707,11 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 e.printStackTrace();
                 this.result = false;
                 if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())){
-                    errorType = CLIENT_ERROR;
+                    //errorType = CLIENT_ERROR;
                     clientFailure = (HttpClientErrorException) e;
                 }
                 if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName())){
-                    errorType = SERVER_ERROR;
+                    //errorType = SERVER_ERROR;
                     serverFailure = (HttpServerErrorException) e;
                 }
             }
@@ -712,7 +722,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             System.out.println(" in the url " + url);
             e.printStackTrace();
             this.result = false;
-            errorType = ERROR;
+            //errorType = ERROR;
         }
     }
 
@@ -741,6 +751,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 System.out.println("BAD:" + e.getResponseBodyAsString());
+                errorResponse = e.getResponseBodyAsString();
                 failure = e;
                 System.out.println("The error was caused by the body "+entityClass.getCanonicalName());
                 System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
@@ -748,11 +759,11 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 e.printStackTrace();
                 this.result = false;
                 if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())){
-                    errorType = CLIENT_ERROR;
+                    //errorType = CLIENT_ERROR;
                     clientFailure = (HttpClientErrorException) e;
                 }
                 if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName())){
-                    errorType = SERVER_ERROR;
+                    //errorType = SERVER_ERROR;
                     serverFailure = (HttpServerErrorException) e;
                 }
             }
@@ -763,7 +774,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             System.out.println(" in the url " + url);
             e.printStackTrace();
             this.result = false;
-            errorType = ERROR;
+            //errorType = ERROR;
         }
 
     }
@@ -798,6 +809,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 System.out.println("BAD:" + e.getResponseBodyAsString());
+                errorResponse = e.getResponseBodyAsString();
                 failure = e;
                 System.out.println("The error was caused by the body "+entityClass.getCanonicalName());
                 System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
@@ -805,11 +817,11 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 e.printStackTrace();
                 this.result = false;
                 if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())){
-                    errorType = CLIENT_ERROR;
+                    //errorType = CLIENT_ERROR;
                     clientFailure = (HttpClientErrorException) e;
                 }
                 if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName())){
-                    errorType = SERVER_ERROR;
+                    //errorType = SERVER_ERROR;
                     serverFailure = (HttpServerErrorException) e;
                 }
             }
@@ -820,7 +832,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             System.out.println(" in the url " + url);
             e.printStackTrace();
             this.result = false;
-            errorType = ERROR;
+            //errorType = ERROR;
         }
 
     }
@@ -873,6 +885,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
                 this.responseStatus = e.getStatusCode();
                 System.out.println("BAD:" + e.getResponseBodyAsString());
+                errorResponse = e.getResponseBodyAsString();
                 failure = e;
                 System.out.println("The error was caused by the body "+entityClass.getCanonicalName());
                 System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
@@ -880,11 +893,11 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 e.printStackTrace();
                 this.result = false;
                 if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())){
-                    errorType = CLIENT_ERROR;
+                    //errorType = CLIENT_ERROR;
                     clientFailure = (HttpClientErrorException) e;
                 }
                 if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName())){
-                    errorType = SERVER_ERROR;
+                    //errorType = SERVER_ERROR;
                     serverFailure = (HttpServerErrorException) e;
                 }
             }
@@ -895,7 +908,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             System.out.println(" in the url " + url);
             e.printStackTrace();
             this.result = false;
-            errorType = ERROR;
+            //errorType = ERROR;
         }
 
     }
@@ -993,7 +1006,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 errorExecution();
             }
         }
-        if(commonTasks!=null) commonTasks.performCommonTask();
+        if(commonTasks!=null) commonTasks.performCommonTask(result, this.getResponseStatus());
         context = null;
     }
 
@@ -1001,42 +1014,18 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         boolean executed = false;
 
         if(serverTaskFailure != null && !executed){
-            try {
-                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                    serverTaskFailure.onServerTaskFailed(null, serverFailure);
-                }
-                else{
-                    serverTaskFailure.onServerTaskFailed(jsonResponseEntityClass.newInstance(), serverFailure);
-                }
-
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                //e.printStackTrace();
-            }
+            serverTaskFailure.onServerTaskFailed(getErrorBody(errorResponseEntityClass, errorResponse), serverFailure);
             executed = true;
         }
 
         if(clientTaskFailure != null && !executed){
-            try {
-                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
-                    clientTaskFailure.onClientTaskFailed(null, clientFailure);
-                }
-                else{
-                    clientTaskFailure.onClientTaskFailed(jsonResponseEntityClass.newInstance(), clientFailure);
-                }
-
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                //e.printStackTrace();
-            }
+            clientTaskFailure.onClientTaskFailed(getErrorBody(errorResponseEntityClass, errorResponse), clientFailure);
             executed = true;
         }
 
         if(taskFailure != null && !executed){
             try {
-                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())){
+                if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())) {
                     taskFailure.onTaskFailed(null, failure);
                 }
                 else{
@@ -1054,7 +1043,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void createDelayedCall(boolean enableDelayedReprocess){
-        GenericRestCall<T, X> delayedCall = new GenericRestCall(entityClass, jsonResponseEntityClass);
+        GenericRestCall<T, X, M> delayedCall = new GenericRestCall(entityClass, jsonResponseEntityClass, errorResponseEntityClass);
         delayedCall.setMethodToCall(this.methodToCall);
         delayedCall.setUrl(this.getUrl());
         delayedCall.setRequestHeaders(this.getRequestHeaders());
@@ -1079,6 +1068,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
     }
 
+
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void execute(boolean asynchronously){
         if(asynchronously){
@@ -1093,6 +1083,30 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 e.printStackTrace();
             }
         }
+    }
+
+    public <T> T getErrorBody(Class<T> errorBodyClass, String jsonBody){
+        try {
+
+            //JSONObject jsonObj = new JSONObject(jsonBody.toString());
+
+            T errorBody = errorBodyClass.newInstance();
+            ObjectMapper mapper = new ObjectMapper();
+            errorBody = mapper.readValue(jsonBody, errorBodyClass);
+            return errorBody;
+
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }
