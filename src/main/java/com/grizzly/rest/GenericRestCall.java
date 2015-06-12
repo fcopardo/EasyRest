@@ -639,6 +639,12 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
                 System.out.println(" in the url " + url);
                 e.printStackTrace();
             }
+            catch(org.springframework.http.converter.HttpMessageNotReadableException e){
+                System.out.println("Conversion error the error found "+e.getMessage());
+                System.out.println(" the expected response type was " + jsonResponseEntityClass.getCanonicalName());
+                System.out.println(" in the url " + url);
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             failure = e;
             System.out.println("The error was caused by the body "+entityClass.getCanonicalName());
@@ -985,6 +991,8 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         if(context != null && enableCache){
             getFromSolidCache();
         }
+
+        if(responseStatus.value()>399) result = false;
 
         if(result){
             if(taskCompletion != null){
