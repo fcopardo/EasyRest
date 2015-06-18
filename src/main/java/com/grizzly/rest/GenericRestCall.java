@@ -22,10 +22,14 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
-import com.grizzly.rest.Model.*;
+import com.grizzly.rest.Model.afterClientTaskFailure;
+import com.grizzly.rest.Model.afterServerTaskFailure;
+import com.grizzly.rest.Model.afterTaskCompletion;
+import com.grizzly.rest.Model.afterTaskFailure;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.OkHttpRequestFactory;
@@ -502,7 +506,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
                 this.responseStatus = HttpStatus.OK;
                 return true;
             }
-            System.out.println("EasyRest - Cache Failure - FileName: "+ getCachedFileName());
+            System.out.println("EasyRest - Cache Failure - FileName: " + getCachedFileName());
         } catch (JsonGenerationException e) {
 
             this.failure = e;
@@ -546,6 +550,13 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
     public void setAutomaticCacheRefresh(boolean automaticCacheRefresh) {
         this.automaticCacheRefresh = automaticCacheRefresh;
     }
+    
+    private MappingJackson2HttpMessageConverter getJacksonMapper(){
+        MappingJackson2HttpMessageConverter jacksonConverter = new MappingJackson2HttpMessageConverter();
+        jacksonConverter.getObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        jacksonConverter.getObjectMapper().configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
+        return jacksonConverter;
+    } 
 
     /**
      * Post call. Sends T in J form to retrieve a X result.
@@ -563,7 +574,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             }
 
             List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
-            messageConverters.add(new MappingJackson2HttpMessageConverter());
+            messageConverters.add(getJacksonMapper());
             restTemplate.setMessageConverters(messageConverters);
 
             try {
@@ -640,7 +651,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
         try {
 
             List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
-            messageConverters.add(new MappingJackson2HttpMessageConverter());
+            messageConverters.add(getJacksonMapper());
             restTemplate.setMessageConverters(messageConverters);
 
             try {
@@ -715,7 +726,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
 
             HttpEntity<?> requestEntity = new HttpEntity<Object>(entity, requestHeaders);
             List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
-            messageConverters.add(new MappingJackson2HttpMessageConverter());
+            messageConverters.add(getJacksonMapper());
             restTemplate.setMessageConverters(messageConverters);
 
             try {
@@ -772,7 +783,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             /*
              * commented: testing GSON instead of Jackson as a message converter
              * */
-            messageConverters.add(new MappingJackson2HttpMessageConverter());
+            messageConverters.add(getJacksonMapper());
             //messageConverters.create(new GsonHttpMessageConverter());
             restTemplate.setMessageConverters(messageConverters);
 
@@ -831,7 +842,7 @@ public class GenericRestCall<T, X> extends AsyncTask<Void, Void, Boolean> {
             }
 
             List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
-            messageConverters.add(new MappingJackson2HttpMessageConverter());
+            messageConverters.add(getJacksonMapper());
             restTemplate.setMessageConverters(messageConverters);
 
             try {
