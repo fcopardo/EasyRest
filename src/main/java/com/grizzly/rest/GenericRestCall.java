@@ -21,8 +21,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.util.Log;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
@@ -520,7 +522,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
                 this.responseStatus = HttpStatus.OK;
                 return true;
             }
-            System.out.println("EasyRest - Cache Failure - FileName: "+ getCachedFileName());
+            System.out.println("EasyRest - Cache Failure - FileName: " + getCachedFileName());
         } catch (JsonGenerationException e) {
 
             this.failure = e;
@@ -565,6 +567,13 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         this.automaticCacheRefresh = automaticCacheRefresh;
     }
 
+    private MappingJackson2HttpMessageConverter getJacksonMapper(){
+        MappingJackson2HttpMessageConverter jacksonConverter = new MappingJackson2HttpMessageConverter();
+        jacksonConverter.getObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        jacksonConverter.getObjectMapper().configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
+        return jacksonConverter;
+    }
+
     /**
      * Post call. Sends T in J form to retrieve a X result.
      */
@@ -581,7 +590,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
             }
 
             List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
-            messageConverters.add(new MappingJackson2HttpMessageConverter());
+            messageConverters.add(getJacksonMapper());
             restTemplate.setMessageConverters(messageConverters);
 
             try {
@@ -954,6 +963,16 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected Boolean doInBackground(Void... params) {
 
+        if(BuildConfig.DEBUG){
+            if(getRequestHeaders()!=null){
+                Log.e("EasyRest", "Request Headers");
+                Log.e("EasyRest", "URL : "+getUrl());
+                for(String s: getRequestHeaders().keySet()){
+                    Log.e("EasyRest", s+":"+getRequestHeaders().get(s));
+                }
+            }
+        }
+
         if (this.getMethodToCall()==DefinitionsHttpMethods.METHOD_POST) {
             this.doPost();
         }
@@ -995,6 +1014,14 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         if(responseStatus.value()>399) result = false;
 
         if(result){
+            if(BuildConfig.DEBUG){
+                if(getResponseHeaders()!=null){
+                    Log.e("EasyRest", "Response Headers");
+                    for(String s: getResponseHeaders().keySet()){
+                        Log.e("EasyRest", s+":"+getResponseHeaders().get(s));
+                    }
+                }
+            }
             if(taskCompletion != null){
                 taskCompletion.onTaskCompleted(jsonResponseEntity);
             }
