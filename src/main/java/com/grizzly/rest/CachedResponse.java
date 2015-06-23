@@ -8,7 +8,7 @@ import java.util.Locale;
 /**
  * Created by fpardo on 12/15/14.
  */
-public class CachedResponse implements Serializable {
+class CachedResponse implements Serializable {
 
     private String url;
     private Date creationTime;

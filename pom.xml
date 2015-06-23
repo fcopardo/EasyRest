@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.grizzly.rest</groupId>
 	<artifactId>EasyRest</artifactId>
-	<version>1.0</version>
+	<version>2.0</version>
 	<packaging>aar</packaging>
     <name>EasyRest</name>
     <description>REST library for Android, built on top of Spring-Android.</description>
@@ -74,13 +74,13 @@
         <dependency>
             <groupId>com.squareup.okhttp</groupId>
             <artifactId>okhttp</artifactId>
-            <version>2.2.0</version>
+            <version>2.4.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.squareup.okhttp</groupId>
             <artifactId>okhttp-urlconnection</artifactId>
-            <version>2.2.0</version>
+            <version>2.4.0</version>
         </dependency>
 
         <dependency>

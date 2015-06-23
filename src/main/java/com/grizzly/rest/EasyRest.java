@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +48,6 @@ public class EasyRest {
                 for(Class aClass : classes){
                     if(pathname.getName().contains(aClass.getSimpleName())
                             && pathname.lastModified() > maximumTime){
-                        System.out.println("EasyRest:"+pathname.getClass().getSimpleName()+" expired: "+pathname.lastModified());
                         return true;
                     }
                 }

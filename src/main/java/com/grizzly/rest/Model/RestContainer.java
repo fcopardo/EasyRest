@@ -25,6 +25,7 @@ public class RestContainer {
     private String requestUrl = "";
     private Map<String, Object> urlParameters = null;
     private boolean cacheEnabled = true;
+    private long cacheTime = 0L;
 
     public void setMyHttpMethod(HttpMethod Method) {
 
@@ -99,4 +100,19 @@ public class RestContainer {
         }
     }
 
+    public boolean isCacheEnabled() {
+        return cacheEnabled;
+    }
+
+    public void setCacheEnabled(boolean cacheEnabled) {
+        this.cacheEnabled = cacheEnabled;
+    }
+
+    public long getCacheTime() {
+        return cacheTime;
+    }
+
+    public void setCacheTime(long cacheTime) {
+        this.cacheTime = cacheTime;
+    }
 }

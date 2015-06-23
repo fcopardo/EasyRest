@@ -37,6 +37,7 @@ public class WebServiceFactory implements CacheProvider{
     private long globalCacheTime = 899999;
     private int timeOutValue = 60000;
     private static HashMap<String, String> cachedRequests = new HashMap<>();
+    private String baseUrl = "";
 
 
     public HttpHeaders getRequestHeaders() {
@@ -82,6 +83,10 @@ public class WebServiceFactory implements CacheProvider{
         }
     }
 
+    public void setBaseUrl(String BaseUrl){
+        baseUrl = BaseUrl;
+    }
+
     public WebServiceFactory() {
     }
 
@@ -89,20 +94,30 @@ public class WebServiceFactory implements CacheProvider{
         this.context = context;
     }
 
-    public <T extends sendRestData, X> EasyRestCall<T, X> getRestCallInstance(Class<T> entityClass, Class<X> responseClass) {
+    public <T extends sendRestData, X> EasyRestCall<T, X, Void> getRestCallInstance(Class<T> entityClass, Class<X> responseClass) {
 
-        return this.getRestCallInstance(entityClass, responseClass, false);
+        return this.getRestCallInstance(entityClass, responseClass, Void.class, false);
     }
 
-    public <T extends sendRestData, X> EasyRestCall<T, X> getRestCallInstance(Class<T> entityClass, Class<X> responseClass, boolean isTest) {
+    public <T extends sendRestData, X> EasyRestCall<T, X, Void> getRestCallInstance(Class<T> entityClass, Class<X> responseClass, boolean isTest) {
 
-        EasyRestCall<T, X> myRestCall = null;
+        return this.getRestCallInstance(entityClass, responseClass, Void.class, isTest);
+    }
+
+    public <T extends sendRestData, X, M> EasyRestCall<T, X, M> getRestCallInstance(Class<T> entityClass, Class<X> responseClass, Class<M> errorBodyClass) {
+
+        return this.getRestCallInstance(entityClass, responseClass, errorBodyClass, false);
+    }
+
+    public <T extends sendRestData, X, M> EasyRestCall<T, X, M> getRestCallInstance(Class<T> entityClass, Class<X> responseClass, Class<M> errorBodyClass, boolean isTest) {
+
+        EasyRestCall<T, X, M> myRestCall = null;
 
         if(isTest) {
-            myRestCall = new EasyRestCall<>(entityClass, responseClass, 1);
+            myRestCall = new EasyRestCall<>(entityClass, responseClass, errorBodyClass, 1);
         }
         else {
-            myRestCall = new EasyRestCall<>(entityClass, responseClass);
+            myRestCall = new EasyRestCall<>(entityClass, responseClass, errorBodyClass);
         }
         if(context != null)
         {
@@ -113,26 +128,39 @@ public class WebServiceFactory implements CacheProvider{
         if(requestHeaders!= null && !requestHeaders.isEmpty()){
            myRestCall.setRequestHeaders(requestHeaders);
         }
+        if(!baseUrl.isEmpty() && baseUrl.trim().equalsIgnoreCase("") && baseUrl != null){
+            myRestCall.setUrl(baseUrl);
+        }
         myRestCall.setTimeOut(timeOutValue);
 
 
         return myRestCall;
     }
 
-    public <T, X> GenericRestCall<T, X> getGenericRestCallInstance(Class<T> entityClass, Class<X> responseClass) {
+    public <T, X> GenericRestCall<T, X, Void> getGenericRestCallInstance(Class<T> entityClass, Class<X> responseClass, boolean isTest) {
 
-        return this.getGenericRestCallInstance(entityClass, responseClass, false);
+        return this.getGenericRestCallInstance(entityClass, responseClass, Void.class, isTest);
     }
 
-    public <T, X> GenericRestCall<T, X> getGenericRestCallInstance(Class<T> entityClass, Class<X> responseClass, boolean isTest) {
+    public <T, X> GenericRestCall<T, X, Void> getGenericRestCallInstance(Class<T> entityClass, Class<X> responseClass) {
 
-        GenericRestCall<T, X> myRestCall = null;
+        return this.getGenericRestCallInstance(entityClass, responseClass, Void.class, false);
+    }
+
+    public <T, X, M> GenericRestCall<T, X, M> getGenericRestCallInstance(Class<T> entityClass, Class<X> responseClass, Class<M> errorBodyClass) {
+
+        return this.getGenericRestCallInstance(entityClass, responseClass, errorBodyClass, false);
+    }
+
+    public <T, X, M> GenericRestCall<T, X, M> getGenericRestCallInstance(Class<T> entityClass, Class<X> responseClass, Class<M> errorBodyClass, boolean isTest) {
+
+        GenericRestCall<T, X, M> myRestCall = null;
 
         if(isTest) {
-            myRestCall = new GenericRestCall<>(entityClass, responseClass, 1);
+            myRestCall = new GenericRestCall<>(entityClass, responseClass, errorBodyClass, 1);
         }
         else {
-            myRestCall = new GenericRestCall<>(entityClass, responseClass);
+            myRestCall = new GenericRestCall<>(entityClass, responseClass, errorBodyClass);
         }
 
         try{
@@ -149,13 +177,16 @@ public class WebServiceFactory implements CacheProvider{
         if(requestHeaders!= null && !requestHeaders.isEmpty()){
             myRestCall.setRequestHeaders(requestHeaders);
         }
+        if(!baseUrl.isEmpty() && baseUrl.trim().equalsIgnoreCase("") && baseUrl != null){
+            myRestCall.setUrl(baseUrl);
+        }
         myRestCall.setTimeOut(timeOutValue);
 
         return myRestCall;
     }
 
     @Override
-    public <T, X> boolean setCache(GenericRestCall<T, X> myRestCall, Class<X> responseClass, Class<T> entityClass){
+    public <T, X, M> boolean setCache(GenericRestCall<T, X, M> myRestCall, Class<X> responseClass, Class<T> entityClass, Class<M> errorBodyClass){
 
         boolean bol = false;
 
