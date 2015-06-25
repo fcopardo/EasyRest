@@ -1,11 +1,14 @@
 package com.grizzly.rest;
 
+import com.grizzly.rest.Model.afterTaskCompletion;
+import com.grizzly.rest.Model.afterTaskFailure;
 import com.grizzly.rest.Model.sendRestData;
+import org.springframework.http.HttpHeaders;
 
 /**
  * Created by Fco Pardo on 8/23/14.
  */
-public class EasyRestCall<T extends sendRestData, X, M> extends GenericRestCall<T, X, M>  {
+public class EasyRestCall<T extends sendRestData, X, M> extends GenericRestCall<T,X,M> {
 
 
     public EasyRestCall(Class<T> entityClass, Class<X> jsonResponseEntityClass, Class<M> errorResponseEntityClass){
@@ -24,7 +27,7 @@ public class EasyRestCall<T extends sendRestData, X, M> extends GenericRestCall<
      * @param entity a class implementing sendRestData, to be sent in the request.
      */
     @Override
-    public void setEntity(T entity) {
+    public EasyRestCall<T, X, M> setEntity(T entity) {
 
         super.setEntity(entity);
         try{
@@ -51,6 +54,8 @@ public class EasyRestCall<T extends sendRestData, X, M> extends GenericRestCall<
             this.isCacheEnabled(true);
             this.setCacheTime(entity.getRestContainer().getCacheTime());
         }
+
+        return this;
     }
 
 }

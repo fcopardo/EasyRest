@@ -28,9 +28,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
-import com.grizzly.rest.Model.*;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.grizzly.rest.Model.afterClientTaskFailure;
+import com.grizzly.rest.Model.afterServerTaskFailure;
+import com.grizzly.rest.Model.afterTaskCompletion;
+import com.grizzly.rest.Model.afterTaskFailure;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.OkHttpRequestFactory;
@@ -180,7 +181,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     /**
      * Setter for the request's timeout
      */
-    public void setTimeOut(int miliseconds){
+    public GenericRestCall<T, X, M> setTimeOut(int miliseconds){
         try{
             ((OkHttpRequestFactory)restTemplate.getRequestFactory()).setConnectTimeout(miliseconds);
             ((OkHttpRequestFactory)restTemplate.getRequestFactory()).setReadTimeout(miliseconds);
@@ -188,6 +189,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         catch(ClassCastException e){
             System.out.println("The factory used wasn't OkHttp");
         }
+        return this;
     }
 
     /**
@@ -202,8 +204,9 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
      * Sets the argument entity.
      * @param entity a class implementing sendRestData, to be sent in the request.
      */
-    public void setEntity(T entity) {
+    public GenericRestCall<T, X, M> setEntity(T entity) {
         this.entity = entity;
+        return this;
     }
 
     /**
@@ -244,8 +247,9 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
      * Sets the Http headers to be used.
      * @param requestHeaders an instance of HttpHeaders.
      */
-    public void setRequestHeaders(HttpHeaders requestHeaders) {
+    public GenericRestCall<T, X, M> setRequestHeaders(HttpHeaders requestHeaders) {
         this.requestHeaders = requestHeaders;
+        return this;
     }
 
     /**
@@ -293,7 +297,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
      *
      * @param MethodToCall a valid http method.
      */
-    public void setMethodToCall(HttpMethod MethodToCall) {
+    public GenericRestCall<T, X, M> setMethodToCall(HttpMethod MethodToCall) {
 
         if(fixedMethod == null){
 
@@ -304,10 +308,11 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         else {
             methodToCall = fixedMethod;
         }
+        return this;
     }
 
 
-    public void addUrlParams(Map<String, Object> urlParameters) {
+    public GenericRestCall<T, X, M> addUrlParams(Map<String, Object> urlParameters) {
 
         if(urlParameters != null && !urlParameters.isEmpty()){
             String customUrl = getUrl();
@@ -332,14 +337,16 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
             }
             setUrl(builder.toString());
         }
+        return this;
     }
 
     /**
      * Sets the URL to be used.
      * @param Url the URL of the rest call.
      */
-    public void setUrl(String Url) {
+    public GenericRestCall<T, X, M> setUrl(String Url) {
         url = Url;
+        return this;
     }
 
     public String getUrl(){
@@ -360,40 +367,46 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
      * Interface. Allows to attach a body of code to be executed after a successful rest call.
      * @param task a class implementing the afterTaskCompletion interface.
      */
-    public void setTaskCompletion(afterTaskCompletion task){
+    public GenericRestCall<T, X, M> setTaskCompletion(afterTaskCompletion task){
         this.taskCompletion = task;
+        return this;
     }
 
     /**
      * Interface. Allows to attach a body of code to be executed after a failed rest call.
      * @param taskFailure a class implementing the afterTaskFailure interface.
      */
-    public void setTaskFailure(afterTaskFailure taskFailure) {
+    public GenericRestCall<T, X, M> setTaskFailure(afterTaskFailure taskFailure) {
+
         this.taskFailure = taskFailure;
+        return this;
     }
 
     /**
      * Interface to be executed when a server error occurs.
      * @param serverTaskFailure an instance of the afterServerTaskFailure interface
      */
-    public void setServerTaskFailure(afterServerTaskFailure<M> serverTaskFailure) {
+    public GenericRestCall<T, X, M> setServerTaskFailure(afterServerTaskFailure<M> serverTaskFailure) {
         this.serverTaskFailure = serverTaskFailure;
+        return this;
     }
 
     /**
      * Interface to be executed when a client error arises.
      * @param clientTaskFailure an instance of the afterClientTaskFailure interface
      */
-    public void setClientTaskFailure(afterClientTaskFailure<M> clientTaskFailure) {
+    public GenericRestCall<T, X, M> setClientTaskFailure(afterClientTaskFailure<M> clientTaskFailure) {
         this.clientTaskFailure = clientTaskFailure;
+        return this;
     }
 
     /**
      * Interface to be executed after all processes are finalized, no matter the result.
      * @param commonTasks an instance of the commonTasks interface.
      */
-    public void setCommonTasks(com.grizzly.rest.Model.commonTasks commonTasks) {
+    public GenericRestCall<T, X, M> setCommonTasks(com.grizzly.rest.Model.commonTasks commonTasks) {
         this.commonTasks = commonTasks;
+        return this;
     }
 
     public void setActivity(Activity activity) {
@@ -431,8 +444,9 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         return context;
     }
 
-    public void setContext(Context context) {
+    public GenericRestCall<T, X, M> setContext(Context context) {
         this.context = context;
+        return this;
     }
 
     /**
@@ -547,8 +561,9 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
     }
 
-    public void isCacheEnabled(boolean bol){
+    public GenericRestCall<T, X, M> isCacheEnabled(boolean bol){
         enableCache = bol;
+        return this;
     }
 
     void setCacheProvider(CacheProvider provider){
