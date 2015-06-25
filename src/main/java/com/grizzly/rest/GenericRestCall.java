@@ -1159,4 +1159,8 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         return null;
     }
 
+    public GenericRestCall<T, X, M> getThis(){
+        return this;
+    }
+
 }

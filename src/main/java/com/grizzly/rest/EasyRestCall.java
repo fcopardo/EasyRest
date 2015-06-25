@@ -58,5 +58,10 @@ public class EasyRestCall<T extends sendRestData, X, M> extends GenericRestCall<
         return this;
     }
 
+    @Override
+    public EasyRestCall<T, X, M> getThis(){
+        return this;
+    }
+
 }
 
