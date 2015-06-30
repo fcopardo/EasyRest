@@ -570,8 +570,9 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         cacheProvider = provider;
     }
     
-    public void setCacheTime(Long time){
+    public GenericRestCall<T, X, M> setCacheTime(Long time){
         cacheTime = time;
+        return this;
     }
 
     public void setReprocessWhenRefreshing(boolean reprocessWhenRefreshing) {

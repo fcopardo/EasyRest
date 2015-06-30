@@ -1,9 +1,8 @@
 package com.grizzly.rest;
 
-import com.grizzly.rest.Model.afterTaskCompletion;
-import com.grizzly.rest.Model.afterTaskFailure;
+import android.content.Context;
 import com.grizzly.rest.Model.sendRestData;
-import org.springframework.http.HttpHeaders;
+
 
 /**
  * Created by Fco Pardo on 8/23/14.
@@ -60,6 +59,18 @@ public class EasyRestCall<T extends sendRestData, X, M> extends GenericRestCall<
 
     @Override
     public EasyRestCall<T, X, M> getThis(){
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setCacheTime(Long time){
+        super.setCacheTime(time);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setContext(Context context){
+        super.setContext(context);
         return this;
     }
 
