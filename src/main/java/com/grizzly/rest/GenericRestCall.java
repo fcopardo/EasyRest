@@ -979,7 +979,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected Boolean doInBackground(Void... params) {
 
-        if(BuildConfig.DEBUG){
+        if(EasyRest.isDebugMode()){
             if(getRequestHeaders()!=null){
                 Log.e("EasyRest", "Request Headers");
                 Log.e("EasyRest", "URL : "+getUrl());
@@ -1030,7 +1030,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         if(responseStatus.value()>399) result = false;
 
         if(result){
-            if(BuildConfig.DEBUG){
+            if(EasyRest.isDebugMode()){
                 if(getResponseHeaders()!=null){
                     Log.e("EasyRest", "Response Headers");
                     for(String s: getResponseHeaders().keySet()){

@@ -17,6 +17,8 @@ import java.util.List;
  */
 public class EasyRest {
 
+    private static boolean DebugMode = true;
+
     /**
      * Deletes the EasyRest cache.
      * @param context a valid application context.
@@ -81,6 +83,14 @@ public class EasyRest {
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         context = null;
         return isConnected;
+    }
+
+    public static void setDebugMode(boolean debugMode){
+        DebugMode = debugMode;
+    }
+
+    public static boolean isDebugMode(){
+        return DebugMode;
     }
 
 }
