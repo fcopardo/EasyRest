@@ -1,7 +1,8 @@
 package com.grizzly.rest;
 
+import android.app.Activity;
 import android.content.Context;
-import com.grizzly.rest.Model.sendRestData;
+import com.grizzly.rest.Model.*;
 
 
 /**
@@ -71,6 +72,42 @@ public class EasyRestCall<T extends sendRestData, X, M> extends GenericRestCall<
     @Override
     public EasyRestCall<T, X, M> setContext(Context context){
         super.setContext(context);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setTaskCompletion(afterTaskCompletion task){
+        super.setTaskCompletion(task);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setTaskFailure(afterTaskFailure taskFailure) {
+        super.setTaskFailure(taskFailure);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setServerTaskFailure(afterServerTaskFailure<M> serverTaskFailure) {
+        super.setServerTaskFailure(serverTaskFailure);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setClientTaskFailure(afterClientTaskFailure<M> clientTaskFailure) {
+        super.setClientTaskFailure(clientTaskFailure);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setCommonTasks(com.grizzly.rest.Model.commonTasks commonTasks) {
+        super.setCommonTasks(commonTasks);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setActivity(Activity activity) {
+        super.setActivity(activity);
         return this;
     }
 

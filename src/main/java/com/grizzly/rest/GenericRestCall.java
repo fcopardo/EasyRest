@@ -409,8 +409,9 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         return this;
     }
 
-    public void setActivity(Activity activity) {
+    public GenericRestCall<T, X, M> setActivity(Activity activity) {
         this.activity = activity;
+        return this;
     }
 
     public String getWaitingMessage() {
