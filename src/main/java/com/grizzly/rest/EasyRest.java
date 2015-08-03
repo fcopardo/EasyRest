@@ -7,6 +7,8 @@ import android.os.AsyncTask;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -129,6 +131,27 @@ public class EasyRest {
 
     public static boolean isDebugMode(){
         return DebugMode;
+    }
+
+    /**
+     * Creates a SHA-1 hash from a given string.
+     * @param password the string to be hashed.
+     * @return a String representing the SHA-1 form of the argument.
+     * @throws java.security.NoSuchAlgorithmException if the SHA-1 algorithm is absent from the JVM.
+     */
+    static String getHashOne(String password)
+            throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        md.update(password.getBytes());
+
+        byte byteData[] = md.digest();
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < byteData.length; i++) {
+            sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16)
+                    .substring(1));
+        }
+        return sb.toString();
     }
 
 }

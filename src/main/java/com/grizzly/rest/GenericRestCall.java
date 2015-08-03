@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -496,9 +497,17 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
         if(cachedFileName.isEmpty() || cachedFileName.equalsIgnoreCase("")){
 
+            String queryKey = "";
+            try {
+                queryKey = EasyRest.getHashOne(getURI().getAuthority()+getURI().getPath().replace("/", "_")+getURI().getQuery());
+            } catch (NoSuchAlgorithmException e) {
+                queryKey = getURI().getAuthority()+getURI().getPath().replace("/", "_")+getURI().getQuery();
+                e.printStackTrace();
+            }
+
             String fileName = getContext().getCacheDir().getAbsolutePath() + File.separator + "EasyRest" + File.separator
                     + jsonResponseEntityClass.getSimpleName()
-                    +getURI().getAuthority()+getURI().getPath().replace("/", "_")+getURI().getQuery();
+                    +queryKey;
 
             return fileName;
         }
@@ -736,6 +745,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
                 System.out.println("The error was caused by the body "+entityClass.getCanonicalName());
                 System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
                 System.out.println(" in the url " + url);
+                System.out.println(" with the response " + errorResponse);
                 e.printStackTrace();
                 this.result = false;
                 if(e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())){
