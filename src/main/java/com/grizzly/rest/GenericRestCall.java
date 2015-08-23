@@ -1091,6 +1091,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
                     taskFailure.onTaskFailed(null, failure);
                 }
                 else{
+                    Log.e("EASYREST", "SAFEGUARD");
                     taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
                 }
 
