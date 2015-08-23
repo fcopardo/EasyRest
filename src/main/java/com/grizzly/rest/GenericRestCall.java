@@ -88,6 +88,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     private HttpStatus responseStatus = HttpStatus.I_AM_A_TEAPOT;
     private boolean result = false;
     private HttpMethod fixedMethod;
+    private Map<DeserializationFeature, Boolean> deserializationFeatureMap;
     //private boolean noReturn = false;
 
     private afterTaskCompletion<X> taskCompletion;
@@ -276,7 +277,21 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         return methodToCall;
     }
 
-    public boolean isResult() {
+    public Map<DeserializationFeature, Boolean> getdeserializationFeatureMap() {
+        if(deserializationFeatureMap == null) deserializationFeatureMap = new HashMap<>();
+        return deserializationFeatureMap;
+    }
+
+    public void setdeserializationFeatureMap(Map<DeserializationFeature, Boolean> deserializationFeatureMap) {
+        this.deserializationFeatureMap = deserializationFeatureMap;
+    }
+
+    public void addDeserializationFeature(DeserializationFeature deserializationFeature, boolean activated) {
+        getdeserializationFeatureMap();
+        deserializationFeatureMap.put(deserializationFeature, activated);
+    }
+
+    /*public boolean isResult() {
         return result;
     }
 
@@ -286,7 +301,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
     public void setSingleArgument(String singleArgument) {
         this.singleArgument = singleArgument;
-    }
+    }*/
 
     public HttpStatus getResponseStatus() {
         if(responseStatus==null) responseStatus = HttpStatus.I_AM_A_TEAPOT;
@@ -597,6 +612,12 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         MappingJackson2HttpMessageConverter jacksonConverter = new MappingJackson2HttpMessageConverter();
         jacksonConverter.getObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         jacksonConverter.getObjectMapper().configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
+
+        if(getdeserializationFeatureMap().isEmpty()){
+            for(DeserializationFeature feature : getdeserializationFeatureMap().keySet()){
+                jacksonConverter.getObjectMapper().configure(feature, getdeserializationFeatureMap().get(feature));
+            }
+        }
         return jacksonConverter;
     }
 
