@@ -1117,6 +1117,12 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
                 }
 
             } catch (InstantiationException e) {
+                try{
+                    taskFailure.onTaskFailed(null, failure);
+                }
+                catch(Exception e1){
+                    e1.printStackTrace();
+                }
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
                 //e.printStackTrace();
