@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import java.util.Map;
 
 /**
- * Interface model for dynamic java beans. The require a HashMap<String, Object>
+ * Interface model for dynamic java beans. This require a HashMap<String, Object> member into the implemented class,
+ * or some kind of accessor to one.
  * Created by fpardo on 9/17/15.
  */
 public interface DynamicBean {
