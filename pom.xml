@@ -116,6 +116,7 @@
             <groupId>io.reactivex</groupId>
             <artifactId>rxandroid</artifactId>
             <version>1.0.1</version>
+            <type>aar</type>
         </dependency>
 	</dependencies>
 
