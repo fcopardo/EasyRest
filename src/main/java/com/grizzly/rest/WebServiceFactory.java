@@ -17,13 +17,13 @@
 package com.grizzly.rest;
 
 import android.content.Context;
+import com.grizzly.rest.Model.RestResults;
 import com.grizzly.rest.Model.sendRestData;
 import org.springframework.http.HttpHeaders;
+import rx.Subscriber;
 
 import java.io.File;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created on 24/03/14.
@@ -38,6 +38,8 @@ public class WebServiceFactory implements CacheProvider{
     private int timeOutValue = 60000;
     private static HashMap<String, String> cachedRequests = new HashMap<>();
     private String baseUrl = "";
+
+    private Map<String, List<Subscriber<RestResults>>> subscribers;
 
 
     public HttpHeaders getRequestHeaders() {

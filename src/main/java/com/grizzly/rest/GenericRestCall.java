@@ -28,10 +28,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
-import com.grizzly.rest.Model.afterClientTaskFailure;
-import com.grizzly.rest.Model.afterServerTaskFailure;
-import com.grizzly.rest.Model.afterTaskCompletion;
-import com.grizzly.rest.Model.afterTaskFailure;
+import com.grizzly.rest.Model.*;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.OkHttpRequestFactory;
@@ -41,6 +38,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import rx.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +46,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.Observable;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -115,6 +114,8 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     private boolean reprocessWhenRefreshing = false;
     private boolean automaticCacheRefresh = false;
     private String errorResponse = "";
+
+    private List<Subscriber<RestResults<X>>> mySubscribers;
 
     /**
      * Base constructor.
@@ -621,6 +622,18 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         return jacksonConverter;
     }
 
+    public GenericRestCall<T, X, M> addSuccessSubscriber(Subscriber<RestResults<X>> subscriber){
+        if(mySubscribers==null) mySubscribers = new ArrayList<>();
+        mySubscribers.add(subscriber);
+        return this;
+    }
+
+    public GenericRestCall<T, X, M> deleteSuccessSubscriber(Subscriber<RestResults<X>> subscriber){
+        if(mySubscribers==null) mySubscribers = new ArrayList<>();
+        mySubscribers.remove(subscriber);
+        return this;
+    }
+
     /**
      * Post call. Sends T in J form to retrieve a X result.
      */
@@ -1072,6 +1085,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
             }
             if(taskCompletion != null){
                 taskCompletion.onTaskCompleted(jsonResponseEntity);
+                notifySubscribers(jsonResponseEntity, true);
             }
         }
         else{
@@ -1080,6 +1094,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
                 //TODO: create a more generic naming approach
                 if(getFromSolidCache()){
                     taskCompletion.onTaskCompleted(jsonResponseEntity);
+                    notifySubscribers(jsonResponseEntity, true);
                 }
                 else{
                     errorExecution();
@@ -1201,6 +1216,22 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
     public GenericRestCall<T, X, M> getThis(){
         return this;
+    }
+
+    private void notifySubscribers(X result, boolean success){
+
+        if(mySubscribers!=null && mySubscribers.size()>0){
+            RestResults<X> results = new RestResults<>();
+            results.setSubscriberEntity(result);
+            results.setStatus(this.getResponseStatus().value());
+            results.setSuccessful(success);
+
+            rx.Observable<RestResults<X>> observable = rx.Observable.just(results);
+            for(Subscriber<RestResults<X>> subscriber : mySubscribers ){
+                observable.subscribe(subscriber);
+            }
+        }
+
     }
 
 }
