@@ -299,7 +299,5 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-
-
     }
 }
