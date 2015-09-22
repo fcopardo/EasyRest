@@ -46,7 +46,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.Observable;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -115,7 +114,9 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     private boolean automaticCacheRefresh = false;
     private String errorResponse = "";
 
-    private List<Subscriber<RestResults<X>>> mySubscribers;
+    private List<Subscriber<RestResults<X>>> mySuccessSubscribers;
+    private List<Subscriber<RestResults<M>>> myFailureSubscribers;
+    
 
     /**
      * Base constructor.
@@ -623,14 +624,14 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     }
 
     public GenericRestCall<T, X, M> addSuccessSubscriber(Subscriber<RestResults<X>> subscriber){
-        if(mySubscribers==null) mySubscribers = new ArrayList<>();
-        mySubscribers.add(subscriber);
+        if(mySuccessSubscribers ==null) mySuccessSubscribers = new ArrayList<>();
+        mySuccessSubscribers.add(subscriber);
         return this;
     }
 
     public GenericRestCall<T, X, M> deleteSuccessSubscriber(Subscriber<RestResults<X>> subscriber){
-        if(mySubscribers==null) mySubscribers = new ArrayList<>();
-        mySubscribers.remove(subscriber);
+        if(mySuccessSubscribers ==null) mySuccessSubscribers = new ArrayList<>();
+        mySuccessSubscribers.remove(subscriber);
         return this;
     }
 
@@ -1083,9 +1084,11 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
                     }
                 }
             }
+
+            notifySubscribers(jsonResponseEntity, true, mySuccessSubscribers);
+
             if(taskCompletion != null){
                 taskCompletion.onTaskCompleted(jsonResponseEntity);
-                notifySubscribers(jsonResponseEntity, true);
             }
         }
         else{
@@ -1093,8 +1096,8 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
             if(context != null && taskCompletion != null && enableCache){
                 //TODO: create a more generic naming approach
                 if(getFromSolidCache()){
+                    notifySubscribers(jsonResponseEntity, true, mySuccessSubscribers);
                     taskCompletion.onTaskCompleted(jsonResponseEntity);
-                    notifySubscribers(jsonResponseEntity, true);
                 }
                 else{
                     errorExecution();
@@ -1121,13 +1124,17 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
             executed = true;
         }
 
+        if(executed) notifySubscribers(getErrorBody(errorResponseEntityClass, errorResponse), true, myFailureSubscribers);
+
         if(taskFailure != null && !executed){
             try {
                 if(jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())) {
+                    notifySubscribers(null, false, myFailureSubscribers);
                     taskFailure.onTaskFailed(null, failure);
                 }
                 else{
                     Log.e("EASYREST", "SAFEGUARD");
+                    notifySubscribers(null, false, myFailureSubscribers);
                     taskFailure.onTaskFailed(jsonResponseEntityClass.newInstance(), failure);
                 }
 
@@ -1218,19 +1225,74 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         return this;
     }
 
+    /*
     private void notifySubscribers(X result, boolean success){
 
-        if(mySubscribers!=null && mySubscribers.size()>0){
-            RestResults<X> results = new RestResults<>();
-            results.setSubscriberEntity(result);
-            results.setStatus(this.getResponseStatus().value());
-            results.setSuccessful(success);
+        class Task extends AsyncTask<Void, Void, Void>{
 
-            rx.Observable<RestResults<X>> observable = rx.Observable.just(results);
-            for(Subscriber<RestResults<X>> subscriber : mySubscribers ){
-                observable.subscribe(subscriber);
+            boolean success;
+            X result;
+
+            public Task(){}
+            public Task(X aResult, boolean aSuccess){
+                result = aResult;
+                success = aSuccess;
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                if(mySuccessSubscribers !=null && mySuccessSubscribers.size()>0){
+                    RestResults<X> results = new RestResults<>();
+                    results.setSubscriberEntity(result);
+                    results.setStatus(getResponseStatus().value());
+                    results.setSuccessful(success);
+
+                    rx.Observable<RestResults<X>> observable = rx.Observable.just(results);
+                    for(Subscriber<RestResults<X>> subscriber : mySuccessSubscribers){
+                        observable.subscribe(subscriber);
+                    }
+                }
+                return null;
             }
         }
+
+        Task task = new Task(result, success);
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+    }*/
+
+    private <K> void notifySubscribers(K result, boolean success, final List<Subscriber<RestResults<K>>> mySubscribers){
+
+        class Task extends AsyncTask<Void, Void, Void>{
+
+            boolean success;
+            K result;
+
+            public Task(){}
+            public Task(K aResult, boolean aSuccess){
+                result = aResult;
+                success = aSuccess;
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                if(mySubscribers !=null && mySubscribers.size()>0){
+                    RestResults<K> results = new RestResults<>();
+                    if(result!=null) results.setSubscriberEntity(result);
+                    results.setStatus(getResponseStatus().value());
+                    results.setSuccessful(success);
+
+                    rx.Observable<RestResults<K>> observable = rx.Observable.just(results);
+                    for(Subscriber<RestResults<K>> subscriber : mySubscribers){
+                        observable.subscribe(subscriber);
+                    }
+                }
+                return null;
+            }
+        }
+
+        Task task = new Task(result, success);
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
     }
 
