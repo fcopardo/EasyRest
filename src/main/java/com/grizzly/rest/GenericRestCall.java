@@ -432,6 +432,11 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         return this;
     }
 
+    public GenericRestCall<T, X, M> addHeader(String header, String value){
+        this.getRequestHeaders().add(header, value);
+        return this;
+    }
+
     public String getWaitingMessage() {
         return waitingMessage;
     }

@@ -47,7 +47,7 @@ public class EasyRestCall<T extends sendRestData, X, M> extends GenericRestCall<
             e.printStackTrace();
         }
 
-        this.setUrl(entity.getRestContainer().getRequestUrl());
+        if(this.getUrl() == null || getUrl().trim().equalsIgnoreCase("") ) this.setUrl(entity.getRestContainer().getRequestUrl());
         this.setMethodToCall(entity.getRestContainer().getMyHttpMethod());
         
         if(entity.getRestContainer().isCacheEnabled() && entity.getRestContainer().getCacheTime()>0L){
