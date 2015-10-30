@@ -38,3 +38,4 @@ Manifest.java
 target
 target/generated-sources/r/com/grizzly/rest/BuildConfig.java
 target/generated-sources/r/com/grizzly/rest/Manifest.java
+gen-external-apklibs
