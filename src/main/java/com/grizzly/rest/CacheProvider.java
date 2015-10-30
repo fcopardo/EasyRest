@@ -1,7 +1,5 @@
 package com.grizzly.rest;
 
-import com.grizzly.rest.Model.sendRestData;
-
 /**
  * Created by FcoPardo on 2/16/15.
  */
