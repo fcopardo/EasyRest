@@ -198,13 +198,13 @@ public class WebServiceFactory implements CacheProvider{
             if(!responseClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()) ){
 
 
-                if(cachedRequests.containsKey(myRestCall.getUrl())){
+                /*if(cachedRequests.containsKey(myRestCall.getUrl())){
                     myRestCall.setCachedFileName(cachedRequests.get(myRestCall.getUrl()));
                     return true;
                 }
                 else{
                     cachedRequests.put(myRestCall.getUrl(), myRestCall.getCachedFileName());
-                }
+                }*/
             }
             return false;
         }
