@@ -1045,13 +1045,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         }
 
         if(EasyRest.isDebugMode()){
-            Log.e("EasyRest", "Finishing Time:"+Calendar.getInstance().getTime());
-            if(getResponseHeaders()!=null){
-                Log.e("EasyRest", "Response Headers");
-                for(String s: getResponseHeaders().keySet()){
-                    Log.e("EasyRest", s+":"+getResponseHeaders().get(s));
-                }
-            }
+            Log.e("EasyRest", "Call Time:"+Calendar.getInstance().getTime());
         }
 
         return this.result;
@@ -1086,6 +1080,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
                     for(String s: getResponseHeaders().keySet()){
                         Log.e("EasyRest", s+":"+getResponseHeaders().get(s));
                     }
+                    Log.e("EasyRest", "Here comes your code!");
                 }
             }
             if(taskCompletion != null){
