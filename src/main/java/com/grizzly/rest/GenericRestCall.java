@@ -1030,6 +1030,8 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     protected Boolean doInBackground(Void... params) {
 
         if(EasyRest.isDebugMode()){
+            Log.e("EasyRest", "Call type:"+getMethodToCall().name());
+            Log.e("EasyRest", "Starting time:"+Calendar.getInstance().getTime());
             if(getRequestHeaders()!=null){
                 Log.e("EasyRest", "Request Headers");
                 Log.e("EasyRest", "URL : "+getUrl());
@@ -1054,6 +1056,11 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         if (this.getMethodToCall()==HttpMethod.PUT) {
             this.doPut();
         }
+
+        if(EasyRest.isDebugMode()){
+            Log.e("EasyRest", "Call Time:"+Calendar.getInstance().getTime());
+        }
+
         return this.result;
     }
 
@@ -1086,6 +1093,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
                     for(String s: getResponseHeaders().keySet()){
                         Log.e("EasyRest", s+":"+getResponseHeaders().get(s));
                     }
+                    Log.e("EasyRest", "Here comes your code!");
                 }
             }
             if(taskCompletion != null){
@@ -1116,12 +1124,12 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     private void errorExecution(){
         boolean executed = false;
 
-        if(serverTaskFailure != null && !executed){
+        if(serverTaskFailure != null && !executed && getResponseStatus().value()>499){
             serverTaskFailure.onServerTaskFailed(getErrorBody(errorResponseEntityClass, errorResponse), serverFailure);
             executed = true;
         }
 
-        if(clientTaskFailure != null && !executed){
+        if(clientTaskFailure != null && !executed && getResponseStatus().value()<499 && getResponseStatus().value()>399){
             clientTaskFailure.onClientTaskFailed(getErrorBody(errorResponseEntityClass, errorResponse), clientFailure);
             executed = true;
         }
