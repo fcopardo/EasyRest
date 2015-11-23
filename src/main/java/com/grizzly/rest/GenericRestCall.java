@@ -1109,12 +1109,12 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     private void errorExecution(){
         boolean executed = false;
 
-        if(serverTaskFailure != null && !executed){
+        if(serverTaskFailure != null && !executed && getResponseStatus().value()>499){
             serverTaskFailure.onServerTaskFailed(getErrorBody(errorResponseEntityClass, errorResponse), serverFailure);
             executed = true;
         }
 
-        if(clientTaskFailure != null && !executed){
+        if(clientTaskFailure != null && !executed && getResponseStatus().value()<499){
             clientTaskFailure.onClientTaskFailed(getErrorBody(errorResponseEntityClass, errorResponse), clientFailure);
             executed = true;
         }
