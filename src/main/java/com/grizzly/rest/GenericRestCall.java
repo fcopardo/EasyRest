@@ -233,8 +233,9 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
      * Sets the response entity.
      * @param jsonResponseEntity an instance of X.
      */
-    public void setJsonResponseEntity(X jsonResponseEntity) {
+    public GenericRestCall<T, X, M> setJsonResponseEntity(X jsonResponseEntity) {
         this.jsonResponseEntity = jsonResponseEntity;
+        return this;
     }
 
     /**
@@ -282,13 +283,15 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         return deserializationFeatureMap;
     }
 
-    public void setdeserializationFeatureMap(Map<DeserializationFeature, Boolean> deserializationFeatureMap) {
+    public GenericRestCall<T, X, M> setdeserializationFeatureMap(Map<DeserializationFeature, Boolean> deserializationFeatureMap) {
         this.deserializationFeatureMap = deserializationFeatureMap;
+        return this;
     }
 
-    public void addDeserializationFeature(DeserializationFeature deserializationFeature, boolean activated) {
+    public GenericRestCall<T, X, M> addDeserializationFeature(DeserializationFeature deserializationFeature, boolean activated) {
         getdeserializationFeatureMap();
         deserializationFeatureMap.put(deserializationFeature, activated);
+        return this;
     }
 
     /*public boolean isResult() {
@@ -605,12 +608,14 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         return this;
     }
 
-    public void setReprocessWhenRefreshing(boolean reprocessWhenRefreshing) {
+    public GenericRestCall<T, X, M> setReprocessWhenRefreshing(boolean reprocessWhenRefreshing) {
         this.reprocessWhenRefreshing = reprocessWhenRefreshing;
+        return this;
     }
 
-    public void setAutomaticCacheRefresh(boolean automaticCacheRefresh) {
+    public GenericRestCall<T, X, M> setAutomaticCacheRefresh(boolean automaticCacheRefresh) {
         this.automaticCacheRefresh = automaticCacheRefresh;
+        return this;
     }
 
     private MappingJackson2HttpMessageConverter getJacksonMapper(){
