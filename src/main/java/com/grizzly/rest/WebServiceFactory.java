@@ -18,9 +18,11 @@ package com.grizzly.rest;
 
 import android.content.Context;
 import com.grizzly.rest.Model.RestResults;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.grizzly.rest.Model.sendRestData;
 import org.springframework.http.HttpHeaders;
 import rx.Subscriber;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import java.io.File;
 import java.util.*;
@@ -38,9 +40,9 @@ public class WebServiceFactory implements CacheProvider{
     private int timeOutValue = 60000;
     private static HashMap<String, String> cachedRequests = new HashMap<>();
     private String baseUrl = "";
+    private MappingJackson2HttpMessageConverter jacksonConverter;
 
     private Map<String, List<Subscriber<RestResults>>> subscribers;
-
 
     public HttpHeaders getRequestHeaders() {
         return requestHeaders;
@@ -133,6 +135,9 @@ public class WebServiceFactory implements CacheProvider{
         if(!baseUrl.isEmpty() && baseUrl.trim().equalsIgnoreCase("") && baseUrl != null){
             myRestCall.setUrl(baseUrl);
         }
+        if(jacksonConverter!=null){
+            myRestCall.setJacksonMapper(jacksonConverter);
+        }
         myRestCall.setTimeOut(timeOutValue);
 
 
@@ -182,6 +187,9 @@ public class WebServiceFactory implements CacheProvider{
         if(!baseUrl.isEmpty() && baseUrl.trim().equalsIgnoreCase("") && baseUrl != null){
             myRestCall.setUrl(baseUrl);
         }
+        if(jacksonConverter!=null){
+            myRestCall.setJacksonMapper(jacksonConverter);
+        }
         myRestCall.setTimeOut(timeOutValue);
 
         return myRestCall;
@@ -212,4 +220,25 @@ public class WebServiceFactory implements CacheProvider{
         return bol;
     }
 
+    /**
+     * Factory getter method. Returns either the current instance of the MappingJackson2HttpConverter,
+     * or a initialized one wih FAIL_ON_UNKNOW_PROPERTIES and FAIL_ON_INVALID_SUBTYPE set to false.
+     * @return the jacksonConverter to be used by all the rest calls created by this factory.
+     */
+    public MappingJackson2HttpMessageConverter getJacksonConverter() {
+        if(jacksonConverter == null){
+            MappingJackson2HttpMessageConverter jacksonConverter = new MappingJackson2HttpMessageConverter();
+            jacksonConverter.getObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            jacksonConverter.getObjectMapper().configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
+        }
+        return jacksonConverter;
+    }
+
+    /**
+     * Allows setting a custom MappingJackson2HttpConverter
+     * @param jacksonConverter the converter to be set.
+     */
+    public void setJacksonConverter(MappingJackson2HttpMessageConverter jacksonConverter) {
+        this.jacksonConverter = jacksonConverter;
+    }
 }
