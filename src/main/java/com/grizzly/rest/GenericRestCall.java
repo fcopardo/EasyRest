@@ -762,7 +762,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         try {
 
             List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
-            messageConverters.add(new MappingJackson2HttpMessageConverter());
+            messageConverters.add(getJacksonMapper());
             restTemplate.setMessageConverters(messageConverters);
 
             try {
@@ -839,7 +839,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
             HttpEntity<?> requestEntity = new HttpEntity<Object>(entity, requestHeaders);
             List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
-            messageConverters.add(new MappingJackson2HttpMessageConverter());
+            messageConverters.add(getJacksonMapper());
             restTemplate.setMessageConverters(messageConverters);
 
             try {
@@ -896,7 +896,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
             /*
              * commented: testing GSON instead of Jackson as a message converter
              * */
-            messageConverters.add(new MappingJackson2HttpMessageConverter());
+            messageConverters.add(getJacksonMapper());
             //messageConverters.create(new GsonHttpMessageConverter());
             restTemplate.setMessageConverters(messageConverters);
 
@@ -955,7 +955,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
             }
 
             List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
-            messageConverters.add(new MappingJackson2HttpMessageConverter());
+            messageConverters.add(getJacksonMapper());
             restTemplate.setMessageConverters(messageConverters);
 
             try {
