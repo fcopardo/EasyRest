@@ -116,6 +116,8 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     private boolean automaticCacheRefresh = false;
     private String errorResponse = "";
 
+    private MappingJackson2HttpMessageConverter jacksonConverter;
+
     /**
      * Base constructor.
      *
@@ -619,16 +621,24 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     }
 
     public MappingJackson2HttpMessageConverter getJacksonMapper(){
-        MappingJackson2HttpMessageConverter jacksonConverter = new MappingJackson2HttpMessageConverter();
-        jacksonConverter.getObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        jacksonConverter.getObjectMapper().configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
 
-        if(getdeserializationFeatureMap().isEmpty()){
+        if(jacksonConverter==null){
+            jacksonConverter = new MappingJackson2HttpMessageConverter();
+            jacksonConverter.getObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            jacksonConverter.getObjectMapper().configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
+        }
+
+        if(!getdeserializationFeatureMap().isEmpty()){
             for(DeserializationFeature feature : getdeserializationFeatureMap().keySet()){
                 jacksonConverter.getObjectMapper().configure(feature, getdeserializationFeatureMap().get(feature));
             }
         }
         return jacksonConverter;
+    }
+
+    public GenericRestCall<T, X, M> setJacksonMapper(MappingJackson2HttpMessageConverter customConverter){
+        jacksonConverter = customConverter;
+        return this;
     }
 
     /**
