@@ -46,7 +46,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.Observable;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -1247,7 +1246,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
         if (mySubscribers != null && mySubscribers.size() > 0) {
             RestResults<X> results = new RestResults<>();
-            results.setSubscriberEntity(result);
+            results.setResultEntity(result);
             results.setStatus(this.getResponseStatus().value());
             results.setSuccessful(success);
 

@@ -5,7 +5,7 @@ package com.grizzly.rest.Model;
  */
 public class RestResults<T> {
 
-    private T subscriberEntity;
+    private T resultEntity;
     private int status;
     private boolean successful;
 
@@ -13,12 +13,12 @@ public class RestResults<T> {
 
     }
 
-    public T getSubscriberEntity() {
-        return subscriberEntity;
+    public T getResultEntity() {
+        return resultEntity;
     }
 
-    public void setSubscriberEntity(T subscriberEntity) {
-        this.subscriberEntity = subscriberEntity;
+    public void setResultEntity(T resultEntity) {
+        this.resultEntity = resultEntity;
     }
 
     public int getStatus() {
