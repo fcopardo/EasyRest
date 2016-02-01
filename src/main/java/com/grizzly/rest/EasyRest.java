@@ -27,13 +27,13 @@ public class EasyRest {
      */
     public static void deleteCache(Context context){
 
-        class Task extends AsyncTask<Void, Void, Boolean>{
+
+        class Task implements Runnable{
 
             Context context;
 
             @Override
-            protected Boolean doInBackground(Void... params) {
-
+            public void run() {
                 context = context.getApplicationContext();
                 File f = new File(context.getCacheDir().getAbsolutePath() + File.separator + "EasyRest");
                 if(f.exists()){
@@ -42,14 +42,14 @@ public class EasyRest {
                     }
                 }
                 context = null;
-
-                return null;
             }
         }
 
         Task myTask = new Task();
         myTask.context = context;
-        myTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        Thread thread = new Thread(myTask);
+        thread.start();
+
 
     }
 
@@ -62,15 +62,15 @@ public class EasyRest {
     public static void deleteCache(Context context, List<Class> classes, long maximumTime){
 
 
-        class Task extends AsyncTask<Void, Void, Boolean>{
+        class Task implements Runnable{
 
             public Context context;
             public List<Class> classes = new ArrayList<>();
             public long maximumTime;
 
-            @Override
-            protected Boolean doInBackground(Void... params) {
 
+            @Override
+            public void run() {
                 context = context.getApplicationContext();
                 File f = new File(context.getCacheDir().getAbsolutePath() + File.separator + "EasyRest");
 
@@ -94,7 +94,6 @@ public class EasyRest {
                     }
                 }
                 context = null;
-                return null;
             }
         }
 
@@ -102,7 +101,8 @@ public class EasyRest {
         myTask.classes = classes;
         myTask.context = context;
         myTask.maximumTime = maximumTime;
-        myTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        Thread thread = new Thread(myTask);
+        thread.start();
 
     }
 
