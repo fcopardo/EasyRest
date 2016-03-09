@@ -594,6 +594,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
         if(EasyRest.getCachedRequest(getCachedFileName())!=null){
             jsonResponseEntity = (X) EasyRest.getCachedRequest(getCachedFileName());
+            this.responseStatus = HttpStatus.OK;
             return true;
         }
 
