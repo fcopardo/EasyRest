@@ -21,6 +21,8 @@ public class EasyRest {
 
     private static boolean DebugMode = true;
 
+    private static LiteCachingStorage defaultQuickCache;
+
     /**
      * Deletes the EasyRest cache.
      * @param context a valid application context.
@@ -152,6 +154,27 @@ public class EasyRest {
                     .substring(1));
         }
         return sb.toString();
+    }
+
+    public static void setQuickCachingAmount(int amount){
+        if(defaultQuickCache == null) defaultQuickCache = new LiteCachingStorage();
+        defaultQuickCache.setCachingSize(amount);
+    }
+
+    static void cacheRequest(String name, Object entity){
+        if(defaultQuickCache == null) defaultQuickCache = new LiteCachingStorage();
+        defaultQuickCache.addRequest(name, entity);
+    }
+
+    static Object getCachedRequest(String name){
+        if(defaultQuickCache==null) defaultQuickCache = new LiteCachingStorage();
+        if(defaultQuickCache.isCachedRequest(name)) return defaultQuickCache.getRequest(name);
+        return null;
+    }
+
+    static boolean isCachedRequest(String name){
+        if(defaultQuickCache==null) defaultQuickCache = new LiteCachingStorage();
+        return defaultQuickCache.isCachedRequest(name);
     }
 
 }
