@@ -21,6 +21,7 @@ public class LiteCachingStorage {
                 cachedRequests.remove(s);
                 break;
             }
+            cachedRequests.put(name, entity);
         }
         cachedRequestAmount++;
     }
