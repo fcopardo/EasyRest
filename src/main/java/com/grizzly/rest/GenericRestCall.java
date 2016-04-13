@@ -563,6 +563,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
     private void createSolidCache() {
 
+        EasyRest.cacheRequest(getCachedFileName(), jsonResponseEntity);
         class Task implements Runnable{
 
             public Context context;
@@ -590,6 +591,13 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     }
 
     private boolean getFromSolidCache() {
+
+        if(EasyRest.getCachedRequest(getCachedFileName())!=null){
+            jsonResponseEntity = (X) EasyRest.getCachedRequest(getCachedFileName());
+            this.responseStatus = HttpStatus.OK;
+            return true;
+        }
+
         ObjectMapper mapper = new ObjectMapper();
 
         if (cacheProvider != null) {
@@ -603,6 +611,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
             if (f.exists()) {
                 jsonResponseEntity = mapper.readValue(f, jsonResponseEntityClass);
                 this.responseStatus = HttpStatus.OK;
+                EasyRest.cacheRequest(getCachedFileName(), jsonResponseEntity);
                 return true;
             }
             if (EasyRest.isDebugMode()) System.out.println("EasyRest - Cache Failure - FileName: " + getCachedFileName());
