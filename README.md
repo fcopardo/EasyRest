@@ -23,14 +23,12 @@ and then the dependency:
 
 compile ('com.github.fcopardo:easyrest:v1.3.7@aar'){
     transitive = true
-    ///If you are using jackson, spring-android and ok-http, they are included here.
 }
+//If you are using jackson, spring-android and ok-http, they are included here.
 
 Because we are using jackson, we also should add this to the android configuration:
 
 android {
-
-//Loots of things
 
 packagingOptions {
         exclude 'META-INF/DEPENDENCIES.txt'
