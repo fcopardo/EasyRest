@@ -111,5 +111,11 @@ public class EasyRestCall<T extends sendRestData, X, M> extends GenericRestCall<
         return this;
     }
 
+    @Override
+    public EasyRestCall<T, X, M> setFullAsync(boolean fullAsync) {
+        super.setFullAsync(fullAsync);
+        return this;
+    }
+
 }
 
