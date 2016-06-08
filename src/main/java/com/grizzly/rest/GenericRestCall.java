@@ -115,6 +115,8 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     private List<Action1<RestResults<X>>> mySubscribers;
     private MappingJackson2HttpMessageConverter jacksonConverter;
 
+    private boolean fullAsync = false;
+
     /**
      * Base constructor.
      *
@@ -697,6 +699,15 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         return this;
     }
 
+    public boolean isFullAsync() {
+        return fullAsync;
+    }
+
+    public GenericRestCall<T, X, M> setFullAsync(boolean fullAsync) {
+        this.fullAsync = fullAsync;
+        return this;
+    }
+
     /**
      * Post call. Sends T in J form to retrieve a X result.
      */
@@ -1014,6 +1025,10 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
             Log.e("EasyRest", "Call Time:" + Calendar.getInstance().getTime());
         }
 
+        if(fullAsync){
+            afterCall(result);
+        }
+
         return this.result;
     }
 
@@ -1030,6 +1045,11 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         if (pd != null) {
             pd.dismiss();
         }
+
+        if(!fullAsync) afterCall(result);
+    }
+
+    private void afterCall(Boolean result){
 
         this.result = result.booleanValue();
 
@@ -1069,6 +1089,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         }
         if (commonTasks != null) commonTasks.performCommonTask(result, this.getResponseStatus());
         context = null;
+
     }
 
     private void errorExecution() {
