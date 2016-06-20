@@ -1220,33 +1220,29 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         if (EasyRest.isDebugMode()) System.out.println("BAD:" + e.getResponseBodyAsString());
         errorResponse = e.getResponseBodyAsString();
         failure = e;
-        if (EasyRest.isDebugMode()) {
-            System.out.println("The error was caused by the body " + entityClass.getCanonicalName());
-            System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
-            System.out.println(" in the url " + url);
-            e.printStackTrace();
-        }
+        printError(e);
         this.result = false;
         if (e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())) {
-            //errorType = CLIENT_ERROR;
             clientFailure = (HttpClientErrorException) e;
         }
         if (e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName())) {
-            //errorType = SERVER_ERROR;
             serverFailure = (HttpServerErrorException) e;
         }
     }
 
     private void handleException(Exception e){
         failure = e;
+        printError(e);
+        this.result = false;
+    }
+
+    private void printError(Exception e){
         if (EasyRest.isDebugMode()) {
             System.out.println("The error was caused by the body " + entityClass.getCanonicalName());
             System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
             System.out.println(" in the url " + url);
             e.printStackTrace();
         }
-        this.result = false;
-        //errorType = ERROR;
     }
 
 
