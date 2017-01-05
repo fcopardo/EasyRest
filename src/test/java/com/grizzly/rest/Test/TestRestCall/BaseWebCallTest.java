@@ -356,5 +356,12 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
+
+        System.out.println("Rest test: Reuse call: ");
+        restCall2.execute(true);
+        restCall2.execute(true);
+        restCall2.execute(true);
+
+        System.out.println("\nMy test string is:"+restCall2.getJsonResponseEntity().getMyValue());
     }
 }

@@ -17,23 +17,26 @@ public class RestResults<T> {
         return resultEntity;
     }
 
-    public void setResultEntity(T resultEntity) {
+    public RestResults<T> setResultEntity(T resultEntity) {
         this.resultEntity = resultEntity;
+        return this;
     }
 
     public int getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public RestResults<T> setStatus(int status) {
         this.status = status;
+        return this;
     }
 
     public boolean isSuccessful() {
         return successful;
     }
 
-    public void setSuccessful(boolean successful) {
+    public RestResults<T> setSuccessful(boolean successful) {
         this.successful = successful;
+        return this;
     }
 }

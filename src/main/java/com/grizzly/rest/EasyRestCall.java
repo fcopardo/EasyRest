@@ -10,7 +10,6 @@ import com.grizzly.rest.Model.*;
  */
 public class EasyRestCall<T extends sendRestData, X, M> extends GenericRestCall<T,X,M> {
 
-
     public EasyRestCall(Class<T> entityClass, Class<X> jsonResponseEntityClass, Class<M> errorResponseEntityClass){
 
         super(entityClass, jsonResponseEntityClass, errorResponseEntityClass);

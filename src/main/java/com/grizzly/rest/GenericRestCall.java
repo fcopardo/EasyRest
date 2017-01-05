@@ -35,7 +35,7 @@ import org.springframework.http.client.OkHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.*;
-import rx.*;
+import rx.Observable;
 import rx.functions.Action1;
 
 import java.io.File;
@@ -114,7 +114,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
     private List<Action1<RestResults<X>>> mySubscribers;
     private MappingJackson2HttpMessageConverter jacksonConverter;
-
+    private Observable<RestResults<X>> observable;
     private boolean fullAsync = false;
 
     /**
@@ -1159,7 +1159,37 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void execute(boolean asynchronously) {
         if (asynchronously) {
-            this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            switch (getStatus()){
+                case PENDING:
+                    this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    break;
+                case RUNNING:
+                    break;
+                case FINISHED:
+                    GenericRestCall<T, X, M> restCall = new GenericRestCall<>(entityClass, jsonResponseEntityClass, errorResponseEntityClass)
+                            .setCacheTime(cacheTime)
+                            .setAutomaticCacheRefresh(automaticCacheRefresh)
+                            .setClientTaskFailure(clientTaskFailure)
+                            .setCommonTasks(commonTasks)
+                            .setContext(context)
+                            .setdeserializationFeatureMap(deserializationFeatureMap)
+                            .setEntity(entity)
+                            .setFullAsync(fullAsync)
+                            .setMethodToCall(methodToCall)
+                            .setReprocessWhenRefreshing(reprocessWhenRefreshing)
+                            .setRequestHeaders(requestHeaders)
+                            .setServerTaskFailure(serverTaskFailure)
+                            .setTaskCompletion(taskCompletion)
+                            .setTaskFailure(taskFailure)
+                            .setUrl(url);
+                    if(mySubscribers != null){
+                        for(Action1<RestResults<X>> s : mySubscribers){
+                            restCall.addSuccessSubscriber(s);
+                        }
+                    }
+                    restCall.execute(fullAsync);
+                    break;
+            }
         } else {
             try {
                 this.execute().get();
@@ -1247,6 +1277,24 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         }
         this.result = false;
         //errorType = ERROR;
+    }
+
+    public Observable<RestResults<X>> asObservable(){
+
+        observable = Observable.defer(()->{
+            boolean result = doInBackground();
+            if(result){
+                RestResults<X> restResults = new RestResults<X>()
+                        .setResultEntity(jsonResponseEntity)
+                        .setStatus(getResponseStatus().value())
+                        .setSuccessful(result);
+                return Observable.just(restResults);
+            }else{
+                return Observable.just(null);
+            }
+
+        });
+        return observable;
     }
 
 
