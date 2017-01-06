@@ -85,15 +85,12 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     private boolean result = false;
     private HttpMethod fixedMethod;
     private Map<DeserializationFeature, Boolean> deserializationFeatureMap;
-    //private boolean noReturn = false;
 
     private afterTaskCompletion<X> taskCompletion;
     private afterTaskFailure<X> taskFailure;
     private afterServerTaskFailure<M> serverTaskFailure;
     private afterClientTaskFailure<M> clientTaskFailure;
     private com.grizzly.rest.Model.commonTasks commonTasks;
-
-    //private int //errorType = 0;
 
     private Activity activity;
     private String waitingMessage;
@@ -129,17 +126,6 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         this.errorResponseEntityClass = ErrorResponseEntityClass;
         requestHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-        /**
-         * There is a bug in Jelly Bean regarding the HTTPUrlConnection class. This forces the restTemplate to use
-         * the apache classes instead in all Jelly Bean builds, and lets restTemplate to choose freely in
-         * all the other versions.
-         */
-        if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT <= 18) {
-            //restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-            restTemplate.setRequestFactory(new OkHttpRequestFactory());
-            ((OkHttpRequestFactory) restTemplate.getRequestFactory()).setConnectTimeout(60000);
-            ((OkHttpRequestFactory) restTemplate.getRequestFactory()).setReadTimeout(60000);
-        }
         restTemplate.setRequestFactory(new OkHttpRequestFactory());
         ((OkHttpRequestFactory) restTemplate.getRequestFactory()).setConnectTimeout(60000);
         ((OkHttpRequestFactory) restTemplate.getRequestFactory()).setReadTimeout(60000);
@@ -157,28 +143,6 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         this.errorResponseEntityClass = ErrorResponseEntityClass;
         requestHeaders.setContentType(MediaType.APPLICATION_JSON);
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-    }
-
-    /**
-     * Base constructor for petitions with empty return
-     *
-     * @param EntityClass
-     */
-    public GenericRestCall(Class<T> EntityClass, HttpMethod Method) {
-        this.entityClass = EntityClass;
-        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-
-        /**
-         * There is a bug in Jelly Bean regarding the HTTPUrlConnection class. This forces the restTemplate to use
-         * the apache classes instead in all Jelly Bean builds, and lets restTemplate to choose freely in
-         * all the other versions.
-         */
-        if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT <= 18) {
-            restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-        }
-        if (DefinitionsHttpMethods.isHttpMethod(Method)) {
-            fixedMethod = methodToCall = Method;
-        }
     }
 
     /**
@@ -696,6 +660,15 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     public GenericRestCall<T, X, M> deleteSuccessSubscriber(Action1<RestResults<X>> subscriber) {
         if (mySubscribers == null) mySubscribers = new ArrayList<>();
         mySubscribers.remove(subscriber);
+        return this;
+    }
+
+    public GenericRestCall<T, X, M> setSuccessSubscribers(List<Action1<RestResults<X>>> subscribers) {
+        if(mySubscribers != null){
+            mySubscribers.addAll(subscribers);
+        }else{
+            mySubscribers = subscribers;
+        }
         return this;
     }
 
