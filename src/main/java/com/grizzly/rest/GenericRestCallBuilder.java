@@ -34,13 +34,17 @@ public class GenericRestCallBuilder<T,X,M> {
     private boolean fullAsync = false;
 
     public GenericRestCallBuilder(Class<T> entityClass, Class<X> jsonResponseEntityClass,
-                                  Class<M> errorResponseEntityClass, String url,HttpMethod methodToCall, long cacheTime){
+                                  Class<M> errorResponseEntityClass, String url,
+                                  HttpMethod methodToCall, long cacheTime,
+                                  boolean reprocessWhenRefreshing, boolean automaticCacheRefresh){
         this.entityClass = entityClass;
         this.jsonResponseEntityClass = jsonResponseEntityClass;
         this.errorResponseEntityClass = errorResponseEntityClass;
         this.url = url;
         this.methodToCall = methodToCall;
         this.cacheTime = cacheTime;
+        this.automaticCacheRefresh = automaticCacheRefresh;
+        this.reprocessWhenRefreshing = reprocessWhenRefreshing;
     }
 
     public GenericRestCallBuilder<T, X, M> setFullAsync(boolean fullAsync){
@@ -68,8 +72,14 @@ public class GenericRestCallBuilder<T,X,M> {
         return this;
     }
 
+    public GenericRestCallBuilder<T, X, M> setCommonTasks(commonTasks commonTasks){
+        this.commonTasks = commonTasks;
+        return this;
+    }
+
     public GenericRestCallBuilder<T, X, M> addSubscriber(Action1<RestResults<X>> action){
         mySubscribers.add(action);
+        execute(true);
         return this;
     }
 
@@ -89,7 +99,10 @@ public class GenericRestCallBuilder<T,X,M> {
                 .setClientTaskFailure(clientTaskFailure)
                 .setServerTaskFailure(serverTaskFailure)
                 .setSuccessSubscribers(mySubscribers)
+                .setCommonTasks(commonTasks)
                 .setFullAsync(fullAsync)
+                .setAutomaticCacheRefresh(automaticCacheRefresh)
+                .setReprocessWhenRefreshing(reprocessWhenRefreshing)
                 .setCacheTime(cacheTime);
 
         if(asyncronously){
