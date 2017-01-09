@@ -2,7 +2,14 @@ package com.grizzly.rest;
 
 import android.app.Activity;
 import android.content.Context;
+import com.grizzly.rest.Definitions.DefinitionsHttpMethods;
 import com.grizzly.rest.Model.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.client.OkHttpRequestFactory;
+import rx.functions.Action1;
+
+import java.util.List;
 
 
 /**
@@ -113,6 +120,48 @@ public class EasyRestCall<T extends sendRestData, X, M> extends GenericRestCall<
     @Override
     public EasyRestCall<T, X, M> setFullAsync(boolean fullAsync) {
         super.setFullAsync(fullAsync);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setMethodToCall(HttpMethod MethodToCall) {
+        super.setMethodToCall(MethodToCall);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setUrl(String Url) {
+        super.setUrl(Url);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setRequestHeaders(HttpHeaders requestHeaders) {
+        super.setRequestHeaders(requestHeaders);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setSuccessSubscribers(List<Action1<RestResults<X>>> subscribers) {
+        super.setSuccessSubscribers(subscribers);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setAutomaticCacheRefresh(boolean automaticCacheRefresh) {
+        super.setAutomaticCacheRefresh(automaticCacheRefresh);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setReprocessWhenRefreshing(boolean reprocessWhenRefreshing) {
+        super.setReprocessWhenRefreshing(reprocessWhenRefreshing);
+        return this;
+    }
+
+    @Override
+    public EasyRestCall<T, X, M> setTimeOut(int miliseconds) {
+        super.setTimeOut(miliseconds);
         return this;
     }
 

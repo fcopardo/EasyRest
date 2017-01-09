@@ -15,23 +15,24 @@ import java.util.concurrent.ExecutionException;
  */
 public class GenericRestCallBuilder<T,X,M> {
 
-    private Class<T> entityClass;
-    private Class<X> jsonResponseEntityClass;
-    private Class<M> errorResponseEntityClass;
-    private String url = "";
-    private HttpMethod methodToCall;
-    private HttpHeaders requestHeaders = new HttpHeaders();
-    private afterTaskCompletion<X> taskCompletion;
-    private afterTaskFailure<X> taskFailure;
-    private afterServerTaskFailure<M> serverTaskFailure;
-    private afterClientTaskFailure<M> clientTaskFailure;
-    private com.grizzly.rest.Model.commonTasks commonTasks;
-    private long cacheTime = 899999;
-    private boolean reprocessWhenRefreshing = false;
-    private boolean automaticCacheRefresh = false;
+    protected Class<T> entityClass;
+    protected Class<X> jsonResponseEntityClass;
+    protected Class<M> errorResponseEntityClass;
+    protected String url = "";
+    protected HttpMethod methodToCall;
+    protected HttpHeaders requestHeaders = new HttpHeaders();
+    protected afterTaskCompletion<X> taskCompletion;
+    protected afterTaskFailure<X> taskFailure;
+    protected afterServerTaskFailure<M> serverTaskFailure;
+    protected afterClientTaskFailure<M> clientTaskFailure;
+    protected com.grizzly.rest.Model.commonTasks commonTasks;
+    protected long cacheTime = 899999;
+    protected boolean reprocessWhenRefreshing = false;
+    protected boolean automaticCacheRefresh = false;
+    protected int timeOut;
 
-    private List<Action1<RestResults<X>>> mySubscribers;
-    private boolean fullAsync = false;
+    protected List<Action1<RestResults<X>>> mySubscribers;
+    protected boolean fullAsync = false;
 
     public GenericRestCallBuilder(Class<T> entityClass, Class<X> jsonResponseEntityClass,
                                   Class<M> errorResponseEntityClass, String url,
@@ -89,7 +90,63 @@ public class GenericRestCallBuilder<T,X,M> {
         return this;
     }
 
+    public GenericRestCallBuilder<T, X, M> setAutomaticCacheRefresh(boolean automaticCacheRefresh) {
+        this.automaticCacheRefresh = automaticCacheRefresh;
+        return this;
+    }
+
+    public GenericRestCallBuilder<T, X, M> setReprocessWhenRefreshing(boolean reprocessWhenRefreshing) {
+        this.reprocessWhenRefreshing = reprocessWhenRefreshing;
+        return this;
+    }
+
+    public GenericRestCallBuilder<T, X, M> setCacheTime(long cacheTime) {
+        this.cacheTime = cacheTime;
+        return this;
+    }
+
+    public GenericRestCallBuilder<T, X, M> setUrl(String url) {
+        this.url = url;
+        return this;
+    }
+
+    public GenericRestCallBuilder<T, X, M> setMethodToCall(HttpMethod methodToCall) {
+        this.methodToCall = methodToCall;
+        return this;
+    }
+
+    public GenericRestCallBuilder<T, X, M> setRequestHeaders(HttpHeaders requestHeaders) {
+        this.requestHeaders = requestHeaders;
+        return this;
+    }
+
+    public GenericRestCallBuilder<T, X, M> setMySubscribers(List<Action1<RestResults<X>>> mySubscribers, boolean executeNow) {
+        this.mySubscribers = mySubscribers;
+        if(executeNow) execute(true);
+        return this;
+    }
+
+    public GenericRestCallBuilder<T, X, M> setTimeOut(int timeOut) {
+        this.timeOut = timeOut;
+        return this;
+    }
+
     public void execute(boolean asyncronously){
+
+        if(asyncronously){
+            create().execute(true);
+        }else{
+            try {
+                create().execute().get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public GenericRestCall<T, X, M> create(){
         GenericRestCall<T, X, M> restCall = new GenericRestCall<>(entityClass, jsonResponseEntityClass, errorResponseEntityClass)
                 .setMethodToCall(methodToCall)
                 .setUrl(url)
@@ -103,20 +160,10 @@ public class GenericRestCallBuilder<T,X,M> {
                 .setFullAsync(fullAsync)
                 .setAutomaticCacheRefresh(automaticCacheRefresh)
                 .setReprocessWhenRefreshing(reprocessWhenRefreshing)
-                .setCacheTime(cacheTime);
+                .setCacheTime(cacheTime)
+                .setTimeOut(timeOut);
 
-        if(asyncronously){
-            restCall.execute(true);
-        }else{
-            try {
-                restCall.execute().get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
-
+        return restCall;
     }
 
 

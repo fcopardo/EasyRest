@@ -83,7 +83,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     private HttpHeaders responseHeaders;
     private HttpStatus responseStatus = HttpStatus.I_AM_A_TEAPOT;
     private boolean result = false;
-    private HttpMethod fixedMethod;
+    protected HttpMethod fixedMethod;
     private Map<DeserializationFeature, Boolean> deserializationFeatureMap;
 
     private afterTaskCompletion<X> taskCompletion;

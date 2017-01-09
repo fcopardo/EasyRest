@@ -364,4 +364,41 @@ public class BaseWebCallTest extends BaseAndroidTestClass {
 
         System.out.println("\nMy test string is:"+restCall2.getJsonResponseEntity().getMyValue());
     }
+
+    @Test
+    public void builderTest() {
+
+        Map<String, String> m = new HashMap<>();
+
+        WebServiceFactory webFactory = new WebServiceFactory();
+
+        GenericRestCall<String, TestString, Void> restCall = webFactory.getGenericRestCallInstance(String.class, TestString.class, true);
+
+        String webCall = "a web call with no configuration";
+        Header headers = new BasicHeader("Content-type", "application/json");
+
+        Robolectric.addPendingHttpResponse(HttpStatus.OK.value(), "{\n" +
+                "    \"my_value\": \"asdf\"\n" +
+                "}", headers);
+
+        restCall.setEntity(webCall);
+        restCall.setContext(getContext());
+        restCall.setUrl("www.google.cl");
+        restCall.setMethodToCall(DefinitionsHttpMethods.METHOD_POST);
+        restCall.setFullAsync(true);
+        restCall.setAutomaticCacheRefresh(true);
+
+        try {
+
+            System.out.println("Rest test: CachedWebCall: 1");
+            org.junit.Assert.assertTrue(restCall.execute().get());
+
+            System.out.println("\nMy test string is:" + restCall.getJsonResponseEntity().getMyValue());
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
 }
