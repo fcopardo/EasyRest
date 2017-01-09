@@ -36,7 +36,6 @@ import java.util.Map;
 public class WebServiceFactory implements CacheProvider{
 
     private HttpHeaders requestHeaders = new HttpHeaders();
-    private HttpHeaders responseHeaders = new HttpHeaders();
     private Context context = null;
     private long globalCacheTime = 899999;
     private int timeOutValue = 60000;
@@ -57,7 +56,6 @@ public class WebServiceFactory implements CacheProvider{
 
     public void resetHeaders() {
         requestHeaders = new HttpHeaders();
-        responseHeaders = new HttpHeaders();
     }
 
     private Context getContext() {

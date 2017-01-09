@@ -107,7 +107,8 @@ public class EasyRestCallBuilder<T extends sendRestData,X,M> extends GenericRest
 
     @Override
     public EasyRestCall<T, X, M> create(){
-        EasyRestCall<T, X, M> restCall = new EasyRestCall<>(entityClass, jsonResponseEntityClass, errorResponseEntityClass)
+
+        return new EasyRestCall<>(entityClass, jsonResponseEntityClass, errorResponseEntityClass)
                 .setMethodToCall(methodToCall)
                 .setUrl(url)
                 .setRequestHeaders(requestHeaders)
@@ -122,8 +123,6 @@ public class EasyRestCallBuilder<T extends sendRestData,X,M> extends GenericRest
                 .setReprocessWhenRefreshing(reprocessWhenRefreshing)
                 .setCacheTime(cacheTime)
                 .setTimeOut(timeOut);
-
-        return restCall;
     }
 
 

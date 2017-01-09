@@ -147,7 +147,8 @@ public class GenericRestCallBuilder<T,X,M> {
     }
 
     public GenericRestCall<T, X, M> create(){
-        GenericRestCall<T, X, M> restCall = new GenericRestCall<>(entityClass, jsonResponseEntityClass, errorResponseEntityClass)
+
+        return new GenericRestCall<>(entityClass, jsonResponseEntityClass, errorResponseEntityClass)
                 .setMethodToCall(methodToCall)
                 .setUrl(url)
                 .setRequestHeaders(requestHeaders)
@@ -162,8 +163,6 @@ public class GenericRestCallBuilder<T,X,M> {
                 .setReprocessWhenRefreshing(reprocessWhenRefreshing)
                 .setCacheTime(cacheTime)
                 .setTimeOut(timeOut);
-
-        return restCall;
     }
 
 

@@ -1223,12 +1223,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         if (EasyRest.isDebugMode()) System.out.println("BAD:" + e.getResponseBodyAsString());
         errorResponse = e.getResponseBodyAsString();
         failure = e;
-        if (EasyRest.isDebugMode()) {
-            System.out.println("The error was caused by the body " + entityClass.getCanonicalName());
-            System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
-            System.out.println(" in the url " + url);
-            e.printStackTrace();
-        }
+        printError(e);
         this.result = false;
         if (e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())) {
             //errorType = CLIENT_ERROR;
@@ -1242,12 +1237,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
     private void handleException(Exception e){
         failure = e;
-        if (EasyRest.isDebugMode()) {
-            System.out.println("The error was caused by the body " + entityClass.getCanonicalName());
-            System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
-            System.out.println(" in the url " + url);
-            e.printStackTrace();
-        }
+        printError(e);
         this.result = false;
         //errorType = ERROR;
     }
@@ -1268,6 +1258,15 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
         });
         return observable;
+    }
+
+    protected <L extends Exception> void printError(L e){
+        if (EasyRest.isDebugMode()) {
+            System.out.println("The error was caused by the body " + entityClass.getCanonicalName());
+            System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
+            System.out.println(" in the url " + url);
+            e.printStackTrace();
+        }
     }
 
 
