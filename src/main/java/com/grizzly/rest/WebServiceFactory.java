@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.grizzly.rest.Model.RestResults;
 import com.grizzly.rest.Model.sendRestData;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import rx.Subscriber;
 
@@ -35,13 +36,13 @@ import java.util.Map;
 public class WebServiceFactory implements CacheProvider{
 
     private HttpHeaders requestHeaders = new HttpHeaders();
-    private HttpHeaders responseHeaders = new HttpHeaders();
     private Context context = null;
     private long globalCacheTime = 899999;
     private int timeOutValue = 60000;
     private static HashMap<String, String> cachedRequests = new HashMap<>();
     private String baseUrl = "";
     private MappingJackson2HttpMessageConverter jacksonConverter;
+    private HashMap<String, GenericRestCallBuilder> genericRestCallBuilders = new HashMap<>();
 
     private Map<String, List<Subscriber<RestResults>>> subscribers;
 
@@ -53,18 +54,9 @@ public class WebServiceFactory implements CacheProvider{
         this.requestHeaders = requestHeaders;
     }
 
-    /*public HttpHeaders getResponseHeaders() {
-        return responseHeaders;
-    }*/
-
     public void resetHeaders() {
         requestHeaders = new HttpHeaders();
-        responseHeaders = new HttpHeaders();
     }
-
-    /*public void setResponseHeaders(HttpHeaders responseHeaders) {
-        this.responseHeaders = responseHeaders;
-    }*/
 
     private Context getContext() {
         if(context == null) context = context.getApplicationContext();
@@ -122,26 +114,27 @@ public class WebServiceFactory implements CacheProvider{
             myRestCall = new EasyRestCall<>(entityClass, responseClass, errorBodyClass, 1);
         }
         else {
-            myRestCall = new EasyRestCall<>(entityClass, responseClass, errorBodyClass);
-        }
-        if(context != null)
-        {
-            myRestCall.setContext(getContext());
-            myRestCall.setCacheProvider(this);
-            myRestCall.setCacheTime(globalCacheTime);
-        }
-        if(requestHeaders!= null && !requestHeaders.isEmpty()){
-           myRestCall.setRequestHeaders(requestHeaders);
-        }
-        if(!baseUrl.isEmpty() && baseUrl.trim().equalsIgnoreCase("") && baseUrl != null){
-            myRestCall.setUrl(baseUrl);
-        }
-        if(jacksonConverter!=null){
-            myRestCall.setJacksonMapper(jacksonConverter);
-        }
-        myRestCall.setTimeOut(timeOutValue);
+            if(genericRestCallBuilders.containsKey(entityClass.getSimpleName()+responseClass.getSimpleName()+errorBodyClass.getSimpleName())){
+                GenericRestCallBuilder<T, X, M> restCallBuilder = new EasyRestCallBuilder<>
+                        (entityClass, responseClass, errorBodyClass, "", HttpMethod.GET, globalCacheTime, false, false)
+                        .setTimeOut(timeOutValue);
 
+                if(requestHeaders!= null && !requestHeaders.isEmpty()){
+                    restCallBuilder.setRequestHeaders(requestHeaders);
+                }
+                if(!baseUrl.isEmpty() && baseUrl.trim().equalsIgnoreCase("") && baseUrl != null){
+                    restCallBuilder.setUrl(baseUrl);
+                }
 
+                myRestCall = (EasyRestCall<T, X, M>) restCallBuilder.create();
+                genericRestCallBuilders.put(entityClass.getSimpleName()+responseClass.getSimpleName()+errorBodyClass.getSimpleName(), restCallBuilder);
+            }
+            else {
+                myRestCall = (EasyRestCall<T, X, M>) genericRestCallBuilders.get(entityClass.getSimpleName()+responseClass.getSimpleName()+errorBodyClass.getSimpleName()).create();
+            }
+        }
+
+        setExtras(myRestCall);
         return myRestCall;
     }
 
@@ -168,30 +161,27 @@ public class WebServiceFactory implements CacheProvider{
             myRestCall = new GenericRestCall<>(entityClass, responseClass, errorBodyClass, 1);
         }
         else {
-            myRestCall = new GenericRestCall<>(entityClass, responseClass, errorBodyClass);
-        }
+            if(genericRestCallBuilders.containsKey(entityClass.getSimpleName()+responseClass.getSimpleName()+errorBodyClass.getSimpleName())){
+                GenericRestCallBuilder<T, X, M> restCallBuilder = new GenericRestCallBuilder<>
+                        (entityClass, responseClass, errorBodyClass, "", HttpMethod.GET, globalCacheTime, false, false)
+                        .setTimeOut(timeOutValue);
 
-        try{
-            if(context != null)
-            {
-                myRestCall.setContext(getContext());
-                myRestCall.setCacheProvider(this);
-                myRestCall.setCacheTime(globalCacheTime);
+                if(requestHeaders!= null && !requestHeaders.isEmpty()){
+                    restCallBuilder.setRequestHeaders(requestHeaders);
+                }
+                if(!baseUrl.isEmpty() && baseUrl.trim().equalsIgnoreCase("") && baseUrl != null){
+                    restCallBuilder.setUrl(baseUrl);
+                }
+
+                myRestCall = restCallBuilder.create();
+                genericRestCallBuilders.put(entityClass.getSimpleName()+responseClass.getSimpleName()+errorBodyClass.getSimpleName(), restCallBuilder);
+            }
+            else {
+                myRestCall = (GenericRestCall<T, X, M>) genericRestCallBuilders.get(entityClass.getSimpleName()+responseClass.getSimpleName()+errorBodyClass.getSimpleName()).create();
             }
         }
-        catch(NullPointerException e){
-            e.printStackTrace();
-        }
-        if(requestHeaders!= null && !requestHeaders.isEmpty()){
-            myRestCall.setRequestHeaders(requestHeaders);
-        }
-        if(!baseUrl.isEmpty() && baseUrl.trim().equalsIgnoreCase("") && baseUrl != null){
-            myRestCall.setUrl(baseUrl);
-        }
-        if(jacksonConverter!=null){
-            myRestCall.setJacksonMapper(jacksonConverter);
-        }
-        myRestCall.setTimeOut(timeOutValue);
+
+        setExtras(myRestCall);
 
         return myRestCall;
     }
@@ -241,5 +231,21 @@ public class WebServiceFactory implements CacheProvider{
      */
     public void setJacksonConverter(MappingJackson2HttpMessageConverter jacksonConverter) {
         this.jacksonConverter = jacksonConverter;
+    }
+
+    protected void setExtras(GenericRestCall myRestCall){
+        try{
+            if(context != null)
+            {
+                myRestCall.setContext(getContext());
+                myRestCall.setCacheProvider(this);
+            }
+        }
+        catch(NullPointerException e){
+            e.printStackTrace();
+        }
+        if(jacksonConverter!=null){
+            myRestCall.setJacksonMapper(jacksonConverter);
+        }
     }
 }
