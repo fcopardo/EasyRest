@@ -114,7 +114,7 @@ public class WebServiceFactory implements CacheProvider{
             myRestCall = new EasyRestCall<>(entityClass, responseClass, errorBodyClass, 1);
         }
         else {
-            if(genericRestCallBuilders.containsKey(entityClass.getSimpleName()+responseClass.getSimpleName()+errorBodyClass.getSimpleName())){
+            if(!genericRestCallBuilders.containsKey(entityClass.getSimpleName()+responseClass.getSimpleName()+errorBodyClass.getSimpleName())){
                 GenericRestCallBuilder<T, X, M> restCallBuilder = new EasyRestCallBuilder<>
                         (entityClass, responseClass, errorBodyClass, "", HttpMethod.GET, globalCacheTime, false, false)
                         .setTimeOut(timeOutValue);
@@ -161,7 +161,7 @@ public class WebServiceFactory implements CacheProvider{
             myRestCall = new GenericRestCall<>(entityClass, responseClass, errorBodyClass, 1);
         }
         else {
-            if(genericRestCallBuilders.containsKey(entityClass.getSimpleName()+responseClass.getSimpleName()+errorBodyClass.getSimpleName())){
+            if(!genericRestCallBuilders.containsKey(entityClass.getSimpleName()+responseClass.getSimpleName()+errorBodyClass.getSimpleName())){
                 GenericRestCallBuilder<T, X, M> restCallBuilder = new GenericRestCallBuilder<>
                         (entityClass, responseClass, errorBodyClass, "", HttpMethod.GET, globalCacheTime, false, false)
                         .setTimeOut(timeOutValue);
