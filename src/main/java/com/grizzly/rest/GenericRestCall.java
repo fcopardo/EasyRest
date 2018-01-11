@@ -540,10 +540,14 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
                 ObjectMapper mapper = new ObjectMapper();
 
                 try {
+                    Random random = new Random();
+                    int x = random.nextInt();
+                    Log.e("EasyRest-Cache", "Starting serialization "+x);
                     File dir = new File(context.getCacheDir().getAbsolutePath() + File.separator + "EasyRest");
                     dir.mkdir();
                     File f = new File(getCachedFileName(context));
                     mapper.writeValue(f, jsonResponseEntity);
+                    Log.e("EasyRest-Cache", "Finished serialization "+x);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -781,7 +785,13 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
                             }*/
                             response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
                             result = this.processResponseWithData(response);
-                            System.out.println("EasyRest - We got from service, cache failed!");
+                            if(enableCache){
+                                if(!automaticCacheRefresh && cacheTime==0){
+                                    System.out.println("EasyRest - We got from service!");
+                                }else{
+                                    System.out.println("EasyRest - We got from service, cache failed! "+getCachedFileName());
+                                }
+                            }
                         }
                     } else {
                         response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, jsonResponseEntityClass);
@@ -1107,6 +1117,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         delayedCall.setMethodToCall(this.methodToCall);
         delayedCall.setUrl(this.getUrl());
         delayedCall.setRequestHeaders(this.getRequestHeaders());
+        delayedCall.setAutomaticCacheRefresh(false);
         if (entity != null && !entityClass.getClass().getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName()))
             delayedCall.setEntity(this.entity);
         delayedCall.setCacheTime(0L);
@@ -1123,7 +1134,10 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
             if (serverTaskFailure != null) delayedCall.setServerTaskFailure(this.serverTaskFailure);
             if (activity != null) delayedCall.setActivity(this.activity);
         }
-        if (getContext() != null) delayedCall.setContext(context.getApplicationContext());
+        if (getContext() != null) {
+            delayedCall.setContext(context.getApplicationContext());
+            delayedCall.isCacheEnabled(true);
+        }
         delayedCall.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
     }
