@@ -63,7 +63,6 @@ public class EasyRest {
      */
     public static void deleteCache(Context context, List<Class> classes, long maximumTime){
 
-
         class Task implements Runnable{
 
             public Context context;

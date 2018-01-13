@@ -556,9 +556,7 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
         Task task = new Task();
         task.context = getContext();
-        Thread thread = new Thread(task);
-        thread.start();
-
+        PoolExecutor.getExecutor(true).execute(task);
     }
 
     private boolean getFromSolidCache() {
