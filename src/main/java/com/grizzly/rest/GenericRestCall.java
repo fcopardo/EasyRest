@@ -1258,15 +1258,13 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
         observable = Observable.defer(()->{
             boolean result = doInBackground();
-            if(result){
-                RestResults<X> restResults = new RestResults<X>()
-                        .setResultEntity(jsonResponseEntity)
+            RestResults<X> restResults = new RestResults<X>()
                         .setStatus(getResponseStatus().value())
                         .setSuccessful(result);
-                return Observable.just(restResults);
-            }else{
-                return Observable.just(null);
-            }
+            if(result) restResults.setResultEntity(jsonResponseEntity);
+
+            afterCall(result);
+            return Observable.just(restResults);
 
         });
         return observable;
