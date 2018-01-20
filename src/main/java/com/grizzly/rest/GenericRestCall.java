@@ -1254,6 +1254,11 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         //errorType = ERROR;
     }
 
+    /**
+     * Returns an observable emitting a RestResults<X> object. The RestResults class wraps the response status,
+     * whether the call was successful or not, and the serialized response.
+     * @return an observable emitting a RestResults<responseBody> object.
+     */
     public Observable<RestResults<X>> asObservable(){
 
         observable = Observable.defer(()->{
@@ -1268,6 +1273,19 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
 
         });
         return observable;
+    }
+
+    /**
+     * Returns a plain observable emitting the response body.
+     * @return an Observable<responseBody> object.
+     */
+    public Observable<X> asSimpleObservable(){
+        Observable<X> xObservable = Observable.defer(()->{
+            boolean result = doInBackground();
+            afterCall(result);
+            return Observable.just(jsonResponseEntity);
+        });
+        return xObservable;
     }
 
     protected <L extends Exception> void printError(L e){
