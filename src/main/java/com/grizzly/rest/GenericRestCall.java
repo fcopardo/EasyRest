@@ -683,6 +683,78 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         return this;
     }
 
+
+    /**
+     * Generic rest call method
+     */
+    private void doCall() {
+
+        try {
+
+            List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+            messageConverters.add(getJacksonMapper());
+            restTemplate.setMessageConverters(messageConverters);
+
+            try {
+                HttpEntity<?> requestEntity = new HttpEntity<>(requestHeaders);
+
+                if (jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())) {
+                    ResponseEntity response = restTemplate.exchange(url, getMethodToCall(), requestEntity, Void.class);
+                    result = this.processResponseWithouthData(response);
+                } else {
+                    ResponseEntity<X> response = null;
+
+                    if (context != null) {
+                        File f = new File(getCachedFileName());
+
+                        if (f.exists() && ((enableCache && Calendar.getInstance(Locale.getDefault()).getTimeInMillis() - f.lastModified() <= cacheTime) || !EasyRest.checkConnectivity(getContext()))) {
+                            getFromSolidCache();
+                            if (this.automaticCacheRefresh) this.createDelayedCall(reprocessWhenRefreshing);
+                            result = true;
+                            System.out.println("EasyRest - We got from cache!");
+                        } else {
+                            response = restTemplate.exchange(url, getMethodToCall(), requestEntity, jsonResponseEntityClass);
+                            result = this.processResponseWithData(response);
+                            if(enableCache){
+                                if(!automaticCacheRefresh && cacheTime==0){
+                                    System.out.println("EasyRest - We got from service!");
+                                }else{
+                                    System.out.println("EasyRest - We got from service, cache failed! "+getCachedFileName());
+                                }
+                            }
+                        }
+                    } else {
+                        response = restTemplate.exchange(url, getMethodToCall(), requestEntity, jsonResponseEntityClass);
+                        result = this.processResponseWithData(response);
+                        System.out.println("EasyRest - We got from service, we had no cache!");
+                    }
+                }
+
+            } catch (org.springframework.web.client.HttpClientErrorException | HttpServerErrorException e) {
+                this.responseStatus = e.getStatusCode();
+                System.out.println("BAD:" + e.getResponseBodyAsString());
+                errorResponse = e.getResponseBodyAsString();
+                failure = e;
+                System.out.println("The error was caused by the body " + entityClass.getCanonicalName());
+                System.out.println(" and the response " + jsonResponseEntityClass.getCanonicalName());
+                System.out.println(" in the url " + url);
+                System.out.println(" with the response " + errorResponse);
+                e.printStackTrace();
+                this.result = false;
+                if (e.getClass().getCanonicalName().equalsIgnoreCase(HttpClientErrorException.class.getCanonicalName())) {
+                    //errorType = CLIENT_ERROR;
+                    clientFailure = (HttpClientErrorException) e;
+                }
+                if (e.getClass().getCanonicalName().equalsIgnoreCase(HttpServerErrorException.class.getCanonicalName())) {
+                    //errorType = SERVER_ERROR;
+                    serverFailure = (HttpServerErrorException) e;
+                }
+            }
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
     /**
      * Post call. Sends T in J form to retrieve a X result.
      */
@@ -987,11 +1059,13 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
         }
 
         if (this.getMethodToCall() == DefinitionsHttpMethods.METHOD_POST) {
-            this.doPost();
+            //this.doPost();
+            doCall();
         }
 
         if (this.getMethodToCall() == DefinitionsHttpMethods.METHOD_GET) {
-            this.doGet();
+            //this.doGet();
+            doCall();
         }
 
         if (this.getMethodToCall() == DefinitionsHttpMethods.METHOD_DELETE) {
