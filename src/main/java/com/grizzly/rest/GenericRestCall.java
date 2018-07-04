@@ -346,6 +346,9 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
     }
 
     public String getUrl() {
+        if(getURI().toString().isEmpty()){
+            return url;
+        }
         return getURI().toString();
     }
 
@@ -696,7 +699,12 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
             restTemplate.setMessageConverters(messageConverters);
 
             try {
-                HttpEntity<?> requestEntity = new HttpEntity<>(requestHeaders);
+                HttpEntity<?> requestEntity;
+                if (!entityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())) {
+                    requestEntity = new HttpEntity<>(entity, requestHeaders);
+                } else {
+                    requestEntity = new HttpEntity<>(requestHeaders);
+                }
 
                 if (jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())) {
                     ResponseEntity response = restTemplate.exchange(url, getMethodToCall(), requestEntity, Void.class);
