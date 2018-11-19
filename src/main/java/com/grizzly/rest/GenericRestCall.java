@@ -916,7 +916,6 @@ public class GenericRestCall<T, X, M> extends AsyncTask<Void, Void, Boolean> {
             restTemplate.setMessageConverters(messageConverters);
 
             try {
-
                 if (jsonResponseEntityClass.getCanonicalName().equalsIgnoreCase(Void.class.getCanonicalName())) {
                     ResponseEntity response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, Void.class);
                     result = this.processResponseWithouthData(response);
