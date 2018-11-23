@@ -138,7 +138,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<sdk>
-						<platform>19</platform>
+						<platform>28</platform>
 					</sdk>
 				</configuration>
 			</plugin>
