@@ -71,13 +71,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!--<dependency>
-            <groupId>android</groupId>
-            <artifactId>android</artifactId>
-            <version>${platform.version}</version>
-            <scope>provided</scope>
-        </dependency>-->
-
         <dependency>
             <groupId>com.squareup.okhttp</groupId>
             <artifactId>okhttp</artifactId>
@@ -98,12 +91,6 @@
             <version>2.0.0.M1</version>
             <scope>compile</scope>
         </dependency>
-
-        <!--<dependency>
-            <groupId>org.springframework.android</groupId>
-            <artifactId>spring-android-rest-template</artifactId>
-            <version>1.0.1.RELEASE</version>
-        </dependency>-->
 
         <!--Jackson Library-->
         <dependency>
@@ -158,7 +145,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<sdk>
-						<platform>19</platform>
+						<platform>28</platform>
 					</sdk>
 				</configuration>
 			</plugin>
