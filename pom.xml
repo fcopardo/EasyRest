@@ -82,18 +82,21 @@
             <groupId>com.squareup.okhttp</groupId>
             <artifactId>okhttp</artifactId>
             <version>2.4.0</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.squareup.okhttp</groupId>
             <artifactId>okhttp-urlconnection</artifactId>
             <version>2.4.0</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.android</groupId>
             <artifactId>spring-android-rest-template</artifactId>
             <version>2.0.0.M1</version>
+            <scope>compile</scope>
         </dependency>
 
         <!--<dependency>
@@ -106,17 +109,20 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.6.3</version>
+            <version>2.10.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.6.3</version>
+            <version>2.10.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.6.3</version>
+            <version>2.10.1</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -124,6 +130,7 @@
             <artifactId>rxandroid</artifactId>
             <version>1.0.1</version>
             <type>aar</type>
+            <scope>compile</scope>
         </dependency>
 	</dependencies>
 
